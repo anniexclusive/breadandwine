@@ -14,24 +14,45 @@ struct DevotionalDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text(devotional.cleanTitle)
-                    .font(.title)
+                HStack {
+                    Image(systemName: "book.closed.fill")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(Color.theme.accent)
+                    
+                    VStack(alignment: .leading) {
+                        Text(devotional.cleanTitle)
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(Color.theme.textPrimary)
+                        
+                        Text(devotional.formattedDate)
+                            .font(.subheadline)
+                            .foregroundColor(Color.theme.textSecondary)
+                    }
+                }
+                .padding()
+                .background(Color.theme.background)
+                .cornerRadius(12)
+                .padding(.horizontal)
                 
-                Text(devotional.formattedDate)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Divider()
                 
                 Text(formattedContent.string)
                     .font(.body)
+                    .foregroundColor(Color.theme.textPrimary)
                     .lineSpacing(8)
+                    .padding(.horizontal)
             }
-            .padding()
+            .padding(.top)
         }
+        .background(Color.theme.background)
+        .navigationBarTitle(devotional.cleanTitle, displayMode: .inline)
         .onAppear {
             formatHTMLContent()
         }
-        .navigationBarTitleDisplayMode(.inline)
-    }
+    } 
+
     
     private func formatHTMLContent() {
         let data = Data(devotional.content.rendered.utf8)

@@ -14,15 +14,31 @@ struct DevotionalListView: View {
     
     var body: some View {
         NavigationView {
-            List(viewModel.devotionals) { devotional in
-                NavigationLink(destination: DevotionalDetailView(devotional: devotional)) {
-                    DevotionalRow(devotional: devotional) // No more generic error
+            List {
+                ForEach(viewModel.devotionals) { devotional in
+                    NavigationLink(destination: DevotionalDetailView(devotional: devotional)) {
+                        DevotionalRow(devotional: devotional)
+                            .padding(.vertical, 8)
+                    }
+                    .listRowBackground(Color.theme.background)
                 }
             }
             .navigationTitle("Bread & Wine")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 viewModel.fetchDevotionals()
             }
+            .background(Color.theme.background)
+        }
+        .accentColor(Color.theme.accent)
+        .onAppear {
+            // Navigation bar appearance customization
+            let appearance = UINavigationBarAppearance()
+            appearance.backgroundColor = UIColor(Color.theme.background)
+            appearance.titleTextAttributes = [.foregroundColor: UIColor(Color.theme.textPrimary)]
+            UINavigationBar.appearance().standardAppearance = appearance
+            UINavigationBar.appearance().compactAppearance = appearance
+            UINavigationBar.appearance().scrollEdgeAppearance = appearance
         }
     }
 }
