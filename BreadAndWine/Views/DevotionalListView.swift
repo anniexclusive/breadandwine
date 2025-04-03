@@ -20,7 +20,7 @@ struct DevotionalListView: View {
                         DevotionalRow(devotional: devotional)
                             .padding(.vertical, 8)
                     }
-                    .listRowBackground(Color.theme.background)
+                    .listRowBackground(ColorTheme.background)
                 }
             }
             .navigationTitle("Bread & Wine")
@@ -28,14 +28,14 @@ struct DevotionalListView: View {
             .onAppear {
                 viewModel.fetchDevotionals()
             }
-            .background(Color.theme.background)
+            .background(ColorTheme.background)
         }
-        .accentColor(Color.theme.accent)
+        .accentColor(ColorTheme.accentPrimary)
         .onAppear {
             // Navigation bar appearance customization
             let appearance = UINavigationBarAppearance()
-            appearance.backgroundColor = UIColor(Color.theme.background)
-            appearance.titleTextAttributes = [.foregroundColor: UIColor(Color.theme.textPrimary)]
+            appearance.backgroundColor = UIColor(ColorTheme.background)
+            appearance.titleTextAttributes = [.foregroundColor: UIColor(ColorTheme.textPrimary)]
             UINavigationBar.appearance().standardAppearance = appearance
             UINavigationBar.appearance().compactAppearance = appearance
             UINavigationBar.appearance().scrollEdgeAppearance = appearance

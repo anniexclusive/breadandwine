@@ -29,8 +29,8 @@ class NewsViewModel: ObservableObject {
             
             switch result {
             case .success(let response):
-                self.news = response.data
-                print("✅ Successfully loaded \(response.data.count) news items")
+                self.news = response
+                print("✅ Successfully loaded \(response.count) news items")
             case .failure(let error):
                 self.errorMessage = error.localizedDescription
                 print("❌ Failed to load news: \(error.localizedDescription)")

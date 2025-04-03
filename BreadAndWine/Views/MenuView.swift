@@ -14,9 +14,12 @@ struct MenuView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             VStack(alignment: .leading) {
-                Text("Navigation")
+                Text("Bread & Wine")
                     .font(.title2.bold())
                     .padding(.bottom, 8)
+                Text("Daily Devotional")
+                    .font(.subheadline)
+                    .foregroundColor(ColorTheme.textSecondary)
                 Divider()
             }
             .padding(.top, 40)

@@ -262,7 +262,7 @@ class NetworkManager {
         fetch("devotional", cacheKey: "recent_devotionals", completion: completion)
     }
     
-    func fetchNews(completion: @escaping (Result<APIResponse<NewsEntry>, NetworkError>) -> Void) {
+    func fetchNews(completion: @escaping (Result<[NewsEntry], NetworkError>) -> Void) {
         fetch("news?count=10", cacheKey: "recent_news", completion: completion)
     }
     

@@ -29,13 +29,13 @@ struct HTMLStringView: UIViewRepresentable {
                 font-size: 16px;
                 line-height: 1.5;
                 margin: 0;
-                padding: 10px;
-                color: black;
+                padding: 0 20px;
+                color: #0A1E3C;
             }
             
             @media (prefers-color-scheme: dark) {
                 body {
-                    color: white;
+                    color: #CCC;
                     background-color: black;
                 }
                 a {
@@ -56,6 +56,24 @@ struct HTMLStringView: UIViewRepresentable {
                 max-width: 100%;
                 height: auto;
             }
+                    blockquote {
+                      background: #f9f9f9;
+                      border-left: 10px solid #ccc;
+                      margin: 1.5em 10px;
+                      padding: 0.5em 10px;
+                      quotes: "\\201C""\\201D""\\2018""\\2019";
+                    }
+                    blockquote:before {
+                      color: #ccc;
+                      content: open-quote;
+                      font-size: 4em;
+                      line-height: 0.1em;
+                      margin-right: 0.25em;
+                      vertical-align: -0.4em;
+                    }
+                    blockquote p {
+                      display: inline;
+                    }
         </style>
         """
         

@@ -33,7 +33,7 @@ struct DevotionalApp: View {
                 
                 // Side Menu
                 if showMenu {
-                    MenuView(showMenu: $showMenu)
+                    MenuView(showMenu: $showMenu, selectedTab: $selectedTab)
                         .frame(width: UIScreen.main.bounds.width * 0.7)
                         .transition(.move(edge: .leading))
                 }

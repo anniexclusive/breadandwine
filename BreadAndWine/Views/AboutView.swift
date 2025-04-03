@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AboutView: View {
+    @Environment(\.colorScheme) var colorScheme
     let aboutContent = """
     <p>Bread and Wine Devotional, is a daily devotional publication of Simeon AFOLABI, the Serving Overseer of FIRSTLOVE ASSEMBLY (formerly Revival Peoples Church), in Nigeria.</p>
 
@@ -35,17 +36,17 @@ Simeon Afolabi
                 Image(systemName: "book.closed.fill")
                     .resizable()
                     .frame(width: 40, height: 40)
-                    .foregroundColor(Color.theme.accent)
+                    .foregroundColor(ColorTheme.accentPrimary)
                 
                 VStack(alignment: .leading) {
                     Text("About Bread and Wine Devotional")
                         .font(.title2)
                         .bold()
-                        .foregroundColor(Color.theme.textPrimary)
+                        .foregroundColor(ColorTheme.textPrimary)
                 }
             }
             .padding()
-            .background(Color.theme.background)
+            .background(ColorTheme.background)
             .cornerRadius(12)
             .padding(.horizontal)
             
