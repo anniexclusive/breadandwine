@@ -9,7 +9,7 @@ import SwiftUI
 // Devotional Detail View
 struct DevotionalDetailView: View {
     let devotional: Devotional
-    @State private var formattedContent = NSAttributedString()
+//    @State private var formattedContent = NSAttributedString()
     
     var body: some View {
         ScrollView {
@@ -21,7 +21,7 @@ struct DevotionalDetailView: View {
                         .foregroundColor(Color.theme.accent)
                     
                     VStack(alignment: .leading) {
-                        Text(devotional.cleanTitle)
+                        Text(devotional.title.rendered)
                             .font(.title2)
                             .bold()
                             .foregroundColor(Color.theme.textPrimary)
@@ -38,30 +38,38 @@ struct DevotionalDetailView: View {
                 
                 Divider()
                 
-                Text(formattedContent.string)
-                    .font(.body)
-                    .foregroundColor(Color.theme.textPrimary)
-                    .lineSpacing(8)
-                    .padding(.horizontal)
+                // HTML content section (replaces Text(content.rendered))
+                if let htmlContent = devotional.content.rendered, !htmlContent.isEmpty {
+                    HTMLWebView(html: htmlContent)
+                        .frame(height: UIScreen.main.bounds.height) // Adjust as needed
+                } else {
+                    Text("Error loading content.")
+                        .frame(maxWidth: .infinity)
+                }
+                
+//                Text(formattedContent.string)
+//                    .font(.body)
+//                    .foregroundColor(Color.theme.textPrimary)
+//                    .lineSpacing(8)
+//                    .padding(.horizontal)
             }
             .padding(.top)
         }
         .background(Color.theme.background)
         .navigationBarTitle(devotional.cleanTitle, displayMode: .inline)
-        .onAppear {
-            formatHTMLContent()
-        }
+//        .onAppear {
+//            formatHTMLContent()
+//        }
     } 
 
     
-    private func formatHTMLContent() {
-        let data = Data(devotional.content.rendered.utf8)
-        if let attributedString = try? NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html],
-            documentAttributes: nil
-        ) {
-            formattedContent = attributedString
-        }
-    }
+//    private func formatHTMLContent() {
+//        if let htmlContent = devotional.content.rendered, !htmlContent.isEmpty {
+//                        HTMLWebView(html: htmlContent)
+//                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    } else {
+//                        Text("Error loading content.")
+//                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    }
+//    }
 }

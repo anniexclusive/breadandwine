@@ -13,14 +13,26 @@ import SwiftUI
 struct Devotional: Identifiable, Decodable {
     let id: Int
     let date: String // Date is at the ROOT level, not in acf
-    let title: RenderedField
-    let content: RenderedField
+    let title: Title
+    let content: Content
     let acf: [String] // Represents empty array (ignore if unused)
     
-    // Nested structure for title/content
-    struct RenderedField: Decodable {
-        let rendered: String
-    }
+    struct Title: Decodable {
+            let rendered: String
+        }
+
+        struct Content: Decodable {
+            let rendered: String?
+
+            enum CodingKeys: String, CodingKey {
+                case rendered
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                rendered = try container.decodeIfPresent(String.self, forKey: .rendered) ?? ""
+            }
+        }
     
     // Computed property to format the root-level date
     var formattedDate: String {
