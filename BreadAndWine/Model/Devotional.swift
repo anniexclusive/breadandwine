@@ -23,7 +23,7 @@ struct Devotional: Identifiable, Decodable {
         }
 
     struct Content: Decodable {
-        let rendered: String?
+        let rendered: String
 
         enum CodingKeys: String, CodingKey {
             case rendered

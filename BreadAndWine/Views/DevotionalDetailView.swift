@@ -10,6 +10,7 @@ import SwiftUI
 struct DevotionalDetailView: View {
     let devotional: Devotional
     @Environment(\.colorScheme) var colorScheme
+    @State private var showingShareSheet = false
     
     private var bannerURL: URL? {
         guard let urlString = devotional.yoastHeadJson?.ogImage?.first?.url else { return nil }
@@ -20,13 +21,7 @@ struct DevotionalDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                bannerSection // banner image
-                
-//                HStack {
-//                    Image(systemName: "book.closed.fill")
-//                        .resizable()
-//                        .frame(width: 40, height: 40)
-//                        .foregroundColor(Color.theme.accent)
+                bannerSection // banner image 
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text(devotional.title.rendered)
@@ -51,13 +46,12 @@ struct DevotionalDetailView: View {
                     infoBox(title: "Bible verse", value: verse, icon: "book.fill")
                 }
                 // HTML content section (replaces Text(content.rendered))
-                if let htmlContent = devotional.content.rendered, !htmlContent.isEmpty {
-                    HTMLStringView(htmlContent: htmlContent)
-                        .frame(height: UIScreen.main.bounds.height) // Adjust as needed
-                } else {
-                    Text("Error loading content.")
-                        .frame(maxWidth: .infinity)
-                }
+                    
+                HTMLStringView(htmlContent: devotional.content.rendered)
+                    .frame(height: UIScreen.main.bounds.height) // Adjust as needed
+//                HTMLText(html: devotional.content.rendered)
+//                                    .font(.body)
+//                                    .lineSpacing(6)
                 
                 if let acf = devotional.acf {
                     VStack(alignment: .leading, spacing: 20) {
@@ -89,10 +83,43 @@ struct DevotionalDetailView: View {
         }
         .background(ColorTheme.background)
         .navigationBarTitle(devotional.cleanTitle, displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showingShareSheet = true }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.headline)
+                        .foregroundColor(ColorTheme.accentPrimary)
+                }
+            }
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareSheet(activityItems: [shareContent])
+        }
 //        .onAppear {
 //            formatHTMLContent()
 //        }
     }
+    
+    private var shareContent: String {
+        let title = devotional.title.rendered
+        let content = devotional.content.rendered.stripHTMLTags().trimmingCharacters(in: .whitespacesAndNewlines)
+        // Create URL-safe slug from title
+        let titleSlug = title
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "-")
+            .replacingOccurrences(of: "[^-a-z0-9-]", with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let urlString = "https://breadandwinedevotional.com/devotional/\(titleSlug)/"
+        
+        return """
+        \(title)
+        
+        \(String(content.prefix(300)))...
+        
+        Read more: \(urlString)
+        """
+    }
+    
     // MARK: - Banner Section
     private var bannerSection: some View {
         Group {
