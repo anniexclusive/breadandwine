@@ -7,7 +7,7 @@
 
 import SwiftUI
 // Main App with Tab View
-struct DevotionalApp: View {
+struct RootView: View {
     @State private var showMenu = false
     @State private var selectedTab = 0
     

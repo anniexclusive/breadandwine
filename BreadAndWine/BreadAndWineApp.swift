@@ -13,7 +13,7 @@ struct BreadAndWineApp: App {
     
     var body: some Scene {
         WindowGroup {
-            DevotionalApp()
+            RootView()
         }
     }
 }
