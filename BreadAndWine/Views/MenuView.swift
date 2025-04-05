@@ -95,7 +95,7 @@ struct MenuView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ColorTheme.background.opacity(1))
-//        .edgesIgnoringSafeArea(.all)
+        .edgesIgnoringSafeArea(.all)
     }
     
     private func sectionHeader(_ text: String) -> some View {

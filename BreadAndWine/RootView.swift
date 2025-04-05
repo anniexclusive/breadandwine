@@ -28,10 +28,8 @@ struct RootView: View {
                             Label("Nuggets", systemImage: "info.circle.fill")
                         }
                         .tag(1)
-                }
-//                .disabled(showMenu)
+                } 
                 .blur(radius: showMenu ? 2 : 0)
-                .navigationTitle(navigationTitleForSelectedTab)
                 
                 // Side Menu
                 if showMenu {
@@ -40,7 +38,6 @@ struct RootView: View {
                         .transition(.move(edge: .leading))
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !showMenu {
                     ToolbarItem(placement: .navigationBarLeading) {
@@ -83,14 +80,7 @@ struct RootView: View {
                 }
             )
         }
-    }
-    
-    private var navigationTitleForSelectedTab: String {
-        switch selectedTab {
-        case 0: return "Bread & Wine Devotionals"
-        case 1: return "Nuggets"
-        default: return ""
-        }
+//        .navigationViewStyle(.stack)
     }
 }
 

@@ -28,7 +28,7 @@ struct DevotionalListView: View {
             }
         }
         .navigationTitle("Bread & Wine")
-        .navigationBarTitleDisplayMode(.inline)
+//        .navigationBarTitleDisplayMode(.inline)
         .refreshable {
             viewModel.fetchDevotionals()
         }
