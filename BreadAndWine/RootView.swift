@@ -10,43 +10,47 @@ import SwiftUI
 struct RootView: View {
     @State private var showMenu = false
     @State private var selectedTab = 0
+    @StateObject private var viewModel = DevotionalViewModel()
     
     var body: some View {
         NavigationView {
             ZStack(alignment: .leading) {
                 // Main Content
                 TabView(selection: $selectedTab) {
-                    DevotionalListView()
+                    DevotionalListView(viewModel: viewModel)
                         .tabItem {
                             Label("Devotionals", systemImage: "book.fill")
                         }
                         .tag(0)
                     
-                    AboutView()
+                    NuggetsListView(viewModel: viewModel)
                         .tabItem {
-                            Label("About", systemImage: "info.circle.fill")
+                            Label("Nuggets", systemImage: "info.circle.fill")
                         }
                         .tag(1)
                 }
-                .disabled(showMenu)
+//                .disabled(showMenu)
                 .blur(radius: showMenu ? 2 : 0)
+                .navigationTitle(navigationTitleForSelectedTab)
                 
                 // Side Menu
                 if showMenu {
                     MenuView(showMenu: $showMenu, selectedTab: $selectedTab)
-                        .frame(width: UIScreen.main.bounds.width * 0.7)
+                        .frame(width: UIScreen.main.bounds.width * 0.6)
                         .transition(.move(edge: .leading))
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        withAnimation {
-                            showMenu.toggle()
+                if !showMenu {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            withAnimation {
+                                showMenu.toggle()
+                            }
+                        } label: {
+                            Image(systemName: "line.horizontal.3")
                         }
-                    } label: {
-                        Image(systemName: "line.horizontal.3")
                     }
                 }
             }
@@ -58,8 +62,34 @@ struct RootView: View {
                                 showMenu = true
                             }
                         }
+                        if showMenu && gesture.translation.width < -100 {
+                            withAnimation {
+                                showMenu = false
+                            }
+                        }
                     }
             )
+            .overlay(
+                Group {
+                    if showMenu {
+                        Color.black.opacity(0.001)
+                            .onTapGesture {
+                                withAnimation {
+                                    showMenu = false
+                                }
+                            }
+                            .ignoresSafeArea()
+                    }
+                }
+            )
+        }
+    }
+    
+    private var navigationTitleForSelectedTab: String {
+        switch selectedTab {
+        case 0: return "Bread & Wine Devotionals"
+        case 1: return "Nuggets"
+        default: return ""
         }
     }
 }

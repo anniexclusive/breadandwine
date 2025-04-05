@@ -10,23 +10,44 @@ import Combine
 
 class DevotionalViewModel: ObservableObject {
     @Published var devotionals: [Devotional] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let cacheKey = "cachedDevotionals"
+    
+    init() {
+            loadCachedDevotionals()
+            fetchDevotionals()
+        }
     
     func fetchDevotionals() {
-        guard let url = URL(string: "https://breadandwinedevotional.com/wp-json/wp/v2/devotional") else { return }
+        isLoading = true
         
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data else { return }
-            
-            do {
-                let decodedDevotionals = try JSONDecoder().decode([Devotional].self, from: data)
-                DispatchQueue.main.async {
-                    self.devotionals = decodedDevotionals
+        APIService.shared.fetchDevotionals { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                switch result {
+                case .success(let devotionals):
+                    self?.devotionals = devotionals
+//                    self?.cacheDevotionals(devotionals)
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
                 }
-            } catch {
-                print("Decoding error: \(error)")
-                // For debugging: Print raw JSON
-                print(String(data: data, encoding: .utf8) ?? "Invalid data")
             }
-        }.resume()
+        }
+    }
+    
+//    private func cacheDevotionals(_ devotionals: [Devotional]) {
+//        if let encoded = try? JSONEncoder().encode(devotionals) {
+//            UserDefaults.standard.set(encoded, forKey: cacheKey)
+//        }
+//    }
+//        
+    private func loadCachedDevotionals() {
+        if let data = UserDefaults.standard.data(forKey: cacheKey),
+            let devotionals = try? JSONDecoder().decode([Devotional].self, from: data) {
+            self.devotionals = devotionals
+        }
     }
 }

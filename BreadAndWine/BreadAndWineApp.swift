@@ -13,7 +13,11 @@ struct BreadAndWineApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                IpadRootView()
+            } else {
+                RootView()
+            }
         }
     }
 }

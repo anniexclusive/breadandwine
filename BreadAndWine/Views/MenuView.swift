@@ -13,15 +13,14 @@ struct MenuView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
-            VStack(alignment: .leading) {
-                Text("Bread & Wine")
-                    .font(.title2.bold())
-                    .padding(.bottom, 8)
-                Text("Daily Devotional")
-                    .font(.subheadline)
-                    .foregroundColor(ColorTheme.textSecondary)
-                Divider()
+            HStack {
+                Image("app-logo")
+                    .resizable()
+                    .scaledToFit()  // Changed from scaledToFill for better aspect ratio
+                    .frame(width: 40, height: 40)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
             }
+            .frame(maxWidth: .infinity)  // This makes the HStack take full width
             .padding(.top, 40)
             .padding(.horizontal)
             
@@ -95,8 +94,8 @@ struct MenuView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemBackground))
-        .edgesIgnoringSafeArea(.all)
+        .background(ColorTheme.background.opacity(1))
+//        .edgesIgnoringSafeArea(.all)
     }
     
     private func sectionHeader(_ text: String) -> some View {

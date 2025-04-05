@@ -39,6 +39,7 @@ struct Devotional: Identifiable, Decodable {
         let bible_verse: String?
         let prayer: String?
         let further_study: String?
+        let nugget: String?
         // Add other ACF keys as needed
     }
     
