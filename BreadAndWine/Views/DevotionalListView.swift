@@ -13,38 +13,40 @@ struct DevotionalListView: View {
     @ObservedObject var viewModel: DevotionalViewModel
     
     var body: some View {
-        List {
-            if viewModel.isLoading && viewModel.devotionals.isEmpty {
-                ProgressView("Loading devotionals...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
-            }
-            ForEach(viewModel.devotionals) { devotional in
-                NavigationLink(destination: DevotionalDetailView(devotional: devotional)) {
-                    DevotionalRow(devotional: devotional)
-                        .padding(.vertical, 8)
+        
+        NavigationView {
+            List {
+                if viewModel.isLoading && viewModel.devotionals.isEmpty {
+                    ProgressView("Loading devotionals...")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
                 }
-                .listRowBackground(ColorTheme.background)
+                ForEach(viewModel.devotionals) { devotional in
+                    NavigationLink(destination: DevotionalDetailView(devotional: devotional)) {
+                        DevotionalRow(devotional: devotional)
+                            .padding(.vertical, 8)
+                    }
+                    .listRowBackground(ColorTheme.background)
+                }
             }
+            .navigationTitle("Bread & Wine")
+            .navigationBarTitleDisplayMode(.inline)
+            .refreshable {
+                viewModel.fetchDevotionals()
+            }
+            .background(ColorTheme.background)
+
         }
-        .navigationTitle("Bread & Wine")
-//        .navigationBarTitleDisplayMode(.inline)
-        .refreshable {
-            viewModel.fetchDevotionals()
+        .navigationViewStyle(.stack)
+        .accentColor(ColorTheme.accentPrimary)
+        .onAppear {
+            // Navigation bar appearance customization
+            let appearance = UINavigationBarAppearance()
+            appearance.backgroundColor = UIColor(ColorTheme.background)
+            appearance.titleTextAttributes = [.foregroundColor: UIColor(ColorTheme.textPrimary)]
+            UINavigationBar.appearance().standardAppearance = appearance
+            UINavigationBar.appearance().compactAppearance = appearance
+            UINavigationBar.appearance().scrollEdgeAppearance = appearance
         }
-        .background(ColorTheme.background)
-//        NavigationView {
-//
-//        }
-//        .accentColor(ColorTheme.accentPrimary)
-//        .onAppear {
-//            // Navigation bar appearance customization
-//            let appearance = UINavigationBarAppearance()
-//            appearance.backgroundColor = UIColor(ColorTheme.background)
-//            appearance.titleTextAttributes = [.foregroundColor: UIColor(ColorTheme.textPrimary)]
-//            UINavigationBar.appearance().standardAppearance = appearance
-//            UINavigationBar.appearance().compactAppearance = appearance
-//            UINavigationBar.appearance().scrollEdgeAppearance = appearance
-//        }
     }
 }

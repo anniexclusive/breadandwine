@@ -14,68 +14,71 @@ struct IpadMenuView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     var body: some View {
-        List(selection: $selectedCategory) {
-            Section(header: headerView) {
-                NavigationLink(value: MenuItem.devotions) {
-                    MenuRow(
-                        title: "Bread and Wine",
-                        icon: "book.fill",
-                        isSelected: selectedCategory == .devotions
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            HStack {
+                Image("app-logo")
+                    .resizable()
+                    .scaledToFit()  // Changed from scaledToFill for better aspect ratio
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .frame(maxWidth: .infinity)  // This makes the HStack take full width
+//            .padding(.top, 40)
+            .padding(.bottom, 20)
+            .padding(.horizontal)
+            .background(ColorTheme.background)
+            
+            List(selection: $selectedCategory) {
+                Section(header: sectionHeader("Daily Devotion")) {
+                    NavigationLink(value: MenuItem.devotions) {
+                        MenuRow(
+                            title: "Bread and Wine",
+                            icon: "book.fill",
+                            isSelected: selectedCategory == .devotions
+                        )
+                    }
+                }
+                
+                Section(header: sectionHeader("Social Handle")) {
+                    IpadMenuButton(
+                        title: "Firstlove Social",
+                        icon: "person.2.fill",
+                        action: { openURL("https://www.facebook.com/flarumuokwuta/") }
+                    )
+                }
+                
+                Section(header: sectionHeader("Live Stream")) {
+                    IpadMenuButton(
+                        title: "YouTube",
+                        icon: "play.rectangle.fill",
+                        action: { openURL("https://www.youtube.com/@flarumuokwuta/streams") }
+                    )
+                }
+                
+                Section(header: sectionHeader("Other")) {
+                    IpadMenuButton(
+                        title: "Rate & Update",
+                        icon: "star.fill",
+                        action: { openURL("itms-apps://apple.com/app/idYOUR_APP_ID") }
+                    )
+                    
+                    IpadMenuButton(
+                        title: "Feedback",
+                        icon: "envelope.fill",
+                        action: { openURL("mailto:feedback@example.com") }
+                    )
+                    
+                    IpadMenuButton(
+                        title: "Privacy Policy",
+                        icon: "lock.fill",
+                        action: { openURL("https://breadandwinedevotional.com/privacy-policy") }
                     )
                 }
             }
-            
-            Section(header: sectionHeader("Social Handle")) {
-                IpadMenuButton(
-                    title: "Firstlove Social",
-                    icon: "person.2.fill",
-                    action: { openURL("https://www.facebook.com/flarumuokwuta/") }
-                )
-            }
-            
-            Section(header: sectionHeader("Live Stream")) {
-                IpadMenuButton(
-                    title: "YouTube",
-                    icon: "play.rectangle.fill",
-                    action: { openURL("https://www.youtube.com/@flarumuokwuta/streams") }
-                )
-            }
-            
-            Section(header: sectionHeader("Other")) {
-                IpadMenuButton(
-                    title: "Rate & Update",
-                    icon: "star.fill",
-                    action: { openURL("itms-apps://apple.com/app/idYOUR_APP_ID") }
-                )
-                
-                IpadMenuButton(
-                    title: "Feedback",
-                    icon: "envelope.fill",
-                    action: { openURL("mailto:feedback@example.com") }
-                )
-                
-                IpadMenuButton(
-                    title: "Privacy Policy",
-                    icon: "lock.fill",
-                    action: { openURL("https://breadandwinedevotional.com/privacy-policy") }
-                )
-            }
+            .listStyle(.sidebar)
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .listStyle(.sidebar) 
-        .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Bread & Wine")
-                .font(.title2.bold())
-                .padding(.bottom, 8)
-            Text("Daily Devotional")
-                .font(.subheadline)
-                .foregroundColor(ColorTheme.textSecondary)
-            Divider()
-        }
-        .padding(.top, 20)
     }
     
     private func sectionHeader(_ text: String) -> some View {

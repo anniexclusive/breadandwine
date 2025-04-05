@@ -17,11 +17,11 @@ struct MenuView: View {
                 Image("app-logo")
                     .resizable()
                     .scaledToFit()  // Changed from scaledToFill for better aspect ratio
-                    .frame(width: 40, height: 40)
+                    .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
             .frame(maxWidth: .infinity)  // This makes the HStack take full width
-            .padding(.top, 40)
+            .padding(.top, 60)
             .padding(.horizontal)
             
             ScrollView {
@@ -34,6 +34,13 @@ struct MenuView: View {
                             action: {
                                 selectedTab = 0
                                 showMenu = false
+                            }
+                        )
+                        MenuButton(
+                            title: "Archives",
+                            icon: "archivebox.fill",
+                            action: {
+                                openURL("https://breadandwinedevotional.com/devotional/")
                             }
                         )
                     }
