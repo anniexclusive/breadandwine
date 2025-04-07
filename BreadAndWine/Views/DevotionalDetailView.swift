@@ -13,6 +13,10 @@ struct DevotionalDetailView: View {
     @State private var showingShareSheet = false
     @State private var webViewHeight: CGFloat = 0
     
+    @StateObject private var speechSynthesizer = SpeechSynthesizer()
+    @State private var plainTextContent = ""
+    @State private var isLoadingText = false
+    
     private var bannerURL: URL? {
         guard let urlString = devotional.yoastHeadJson?.ogImage?.first?.url else { return nil }
         return URL(string: urlString)
@@ -35,11 +39,6 @@ struct DevotionalDetailView: View {
                             .foregroundColor(ColorTheme.textSecondary)
                     }
                     .padding()
-//                }
-//                .padding()
-//                .background(Color.theme.background)
-//                .cornerRadius(12)
-//                .padding(.horizontal)
                 
                 Divider()
                 
@@ -56,6 +55,10 @@ struct DevotionalDetailView: View {
                     )
                     .frame(height: webViewHeight)
                     .background(ColorTheme.background)
+                    .onTapGesture {
+                        // Stop speech when user interacts with content
+                        speechSynthesizer.stop()
+                    }
                 }
                 .frame(height: webViewHeight)
 //                DevotionalContentView(htmlContent: devotional.content.rendered ?? "")
@@ -78,13 +81,7 @@ struct DevotionalDetailView: View {
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
-                } 
-                
-//                Text(formattedContent.string)
-//                    .font(.body)
-//                    .foregroundColor(Color.theme.textPrimary)
-//                    .lineSpacing(8)
-//                    .padding(.horizontal)
+                }
             }
             .padding(.top)
         }
@@ -98,13 +95,77 @@ struct DevotionalDetailView: View {
                         .foregroundColor(ColorTheme.accentPrimary)
                 }
             }
+            ToolbarItem(placement: .primaryAction) {
+                PlaybackControlView(
+                    isSpeaking: speechSynthesizer.isSpeaking,
+                    isDisabled: plainTextContent.isEmpty,
+                    onPlayPause: handlePlayPause
+                )
+            }
         }
         .sheet(isPresented: $showingShareSheet) {
             ShareSheet(activityItems: [shareContent])
         }
+        .onAppear(perform: loadContent)
+        .onDisappear(perform: speechSynthesizer.stop)
 //        .onAppear {
 //            formatHTMLContent()
 //        }
+    }
+    
+    private func loadContent() {
+        isLoadingText = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let combinedHTML = [
+                "Welcome to the devotional for",
+                devotional.formattedDate,
+                ";topic;",
+                devotional.title.rendered,
+                ";bible verse; ",
+                devotional.acf?.bible_verse ?? "",
+                devotional.content.rendered,
+                ";further study;",
+                devotional.acf?.further_study ?? "",
+                ";prayer;",
+                devotional.acf?.prayer ?? "",
+                ";biible reading plan;",
+                devotional.acf?.bible_reading_plan ?? "",
+                ";thank you for listening..."
+            ].joined(separator: ". ")  // Add natural pauses between sections
+            
+            let text = convertHTMLToPlainText(combinedHTML)
+            
+            DispatchQueue.main.async {
+                plainTextContent = text
+                isLoadingText = false
+            }
+        }
+    }
+    
+    private func handlePlayPause() {
+        if speechSynthesizer.isSpeaking {
+            speechSynthesizer.pause()
+        } else {
+            speechSynthesizer.speak(text: plainTextContent)
+        }
+    }
+    
+    private func convertHTMLToPlainText(_ html: String) -> String {
+        guard let data = html.data(using: .utf8),
+              let attributedString = try? NSAttributedString(
+                data: data,
+                options: [
+                    .documentType: NSAttributedString.DocumentType.html,
+                    .characterEncoding: String.Encoding.utf8.rawValue
+                ],
+                documentAttributes: nil
+              ) else {
+            return html
+                .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+                .replacingOccurrences(of: "&[^;]+;", with: "", options: .regularExpression)
+        }
+        
+        return attributedString.string
     }
     
     private var shareContent: String {

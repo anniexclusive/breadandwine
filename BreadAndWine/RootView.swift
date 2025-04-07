@@ -49,7 +49,7 @@ struct RootView: View {
             NavigationStack {
                 mainContentView
                     .toolbar {
-                        ToolbarItem() {
+                        ToolbarItem(placement: .navigationBarLeading) {
                             menuButton
                         }
                     }
