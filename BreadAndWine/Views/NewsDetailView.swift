@@ -39,8 +39,8 @@ struct NewsDetailView: View {
                     
                     Divider()
                     
-                    HTMLStringView(htmlContent: news.content)
-                        .frame(minHeight: 300)
+//                    HTMLStringView(htmlContent: news.content)
+//                        .frame(minHeight: 300)
                 }
                 .padding(.vertical)
             }

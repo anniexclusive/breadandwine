@@ -12,35 +12,40 @@ import WebKit
 
 struct HTMLStringView: UIViewRepresentable {
     let htmlContent: String
+    @Binding var contentHeight: CGFloat
+    var containerWidth: CGFloat
+    @Environment(\.colorScheme) private var colorScheme
     
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
-        webView.backgroundColor = UIColor.clear
+        webView.backgroundColor = .clear
         webView.isOpaque = false
+        webView.scrollView.isScrollEnabled = false // Disable internal scrolling
+        webView.navigationDelegate = context.coordinator
         return webView
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        // Only reload if width changes significantly
+        if abs(uiView.bounds.width - containerWidth) > 1 {
+            uiView.frame.size.width = containerWidth
+            loadContent(in: uiView)
+        }
+    }
+    
+    private func loadContent(in webView: WKWebView) {
         // Add CSS for better styling, including dark mode support
         let css = """
         <style>
             body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                font-size: 16px;
+                width: \(containerWidth - 40)px;
+                font-family: -apple-system, BlinkMacSystemFont, Arial, 'Segoe UI', Roboto, Helvetica, sans-serif;
+                font-size: 17px;
                 line-height: 1.5;
                 margin: 0;
                 padding: 0 20px;
-                color: #0A1E3C;
-            }
-            
-            @media (prefers-color-scheme: dark) {
-                body {
-                    color: #CCC;
-                    background-color: black;
-                }
-                a {
-                    color: #0A84FF;
-                }
+                color: \(ColorTheme.textPrimary.hexString(for: colorScheme));
+                background-color: \(ColorTheme.background.hexString(for: colorScheme));
             }
             
             h1, h2, h3, h4, h5, h6 {
@@ -57,7 +62,6 @@ struct HTMLStringView: UIViewRepresentable {
                 height: auto;
             }
                     blockquote {
-                      background: #f9f9f9;
                       border-left: 10px solid #ccc;
                       margin: 1.5em 10px;
                       padding: 0.5em 10px;
@@ -77,11 +81,11 @@ struct HTMLStringView: UIViewRepresentable {
         </style>
         """
         
-        let htmlWithCSS = """
+        let htmlString = """
         <!DOCTYPE html>
         <html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <meta name="viewport" content="width=\(containerWidth), initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             \(css)
         </head>
         <body>
@@ -90,6 +94,54 @@ struct HTMLStringView: UIViewRepresentable {
         </html>
         """
         
-        uiView.loadHTMLString(htmlWithCSS, baseURL: nil)
+        webView.loadHTMLString(htmlString, baseURL: nil)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, WKNavigationDelegate {
+        var parent: HTMLStringView
+        
+        init(_ parent: HTMLStringView) {
+            self.parent = parent
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            updateContentHeight(for: webView)
+        }
+                
+        private func updateContentHeight(for webView: WKWebView) {
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
+                guard let height = height as? CGFloat else { return }
+                DispatchQueue.main.async {
+                    if self.parent.contentHeight != height {
+                        self.parent.contentHeight = height
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension Color {
+    func hexString(for colorScheme: ColorScheme) -> String {
+        let traitCollection = UITraitCollection(userInterfaceStyle: colorScheme == .dark ? .dark : .light)
+        let resolvedColor = UIColor(self).resolvedColor(with: traitCollection)
+        return resolvedColor.hexString ?? "#FFFFFF"
+    }
+}
+
+extension UIColor {
+    var hexString: String? {
+        guard let components = cgColor.components, components.count >= 3 else { return nil }
+        let r = Float(components[0])
+        let g = Float(components[1])
+        let b = Float(components[2])
+        return String(format: "#%02lX%02lX%02lX",
+                     lroundf(r * 255),
+                     lroundf(g * 255),
+                     lroundf(b * 255))
     }
 }

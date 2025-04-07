@@ -11,6 +11,7 @@ struct DevotionalDetailView: View {
     let devotional: Devotional
     @Environment(\.colorScheme) var colorScheme
     @State private var showingShareSheet = false
+    @State private var webViewHeight: CGFloat = 0
     
     private var bannerURL: URL? {
         guard let urlString = devotional.yoastHeadJson?.ogImage?.first?.url else { return nil }
@@ -47,11 +48,17 @@ struct DevotionalDetailView: View {
                 }
                 // HTML content section (replaces Text(content.rendered))
                     
-                HTMLStringView(htmlContent: devotional.content.rendered)
-                    .frame(height: UIScreen.main.bounds.height) // Adjust as needed
-//                HTMLText(html: devotional.content.rendered)
-//                                    .font(.body)
-//                                    .lineSpacing(6)
+                GeometryReader { proxy in
+                    HTMLStringView(
+                        htmlContent: devotional.content.rendered,
+                        contentHeight: $webViewHeight,
+                        containerWidth: proxy.size.width  // Pass current width
+                    )
+                    .frame(height: webViewHeight)
+                    .background(ColorTheme.background)
+                }
+                .frame(height: webViewHeight)
+//                DevotionalContentView(htmlContent: devotional.content.rendered ?? "")
                 
                 if let acf = devotional.acf {
                     VStack(alignment: .leading, spacing: 20) {
