@@ -22,33 +22,35 @@ struct UnifiedMenuView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Common Header
-            HStack {
-                Image("app-logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, sizeClass == .regular ? 40 : 20)
-            .padding(.horizontal)
-            .background(ColorTheme.background.opacity(sizeClass == .regular ? 1 : 0))
-            
             // Content based on device type
             if UIDevice.current.userInterfaceIdiom == .pad {
                 ipadMenuContent
             } else {
+                logoArea
                 phoneMenuContent
             }
         }
         .background(ColorTheme.background)
-//        .edgesIgnoringSafeArea(.all)
+//        .edgesIgnoringSafeArea(.trailing)
+    }
+    
+    private var logoArea: some View {
+        HStack {
+            Image("app-logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, sizeClass == .regular ? 40 : 0)
+//        .padding(.horizontal)
     }
     
     // MARK: - iPad Layout
     private var ipadMenuContent: some View {
         List(selection: $selectedCategory) {
+            logoArea
             Section(header: sectionHeader("Daily Devotion")) {
                 NavigationLink(value: MenuItem.devotions) {
                     MenuRow(

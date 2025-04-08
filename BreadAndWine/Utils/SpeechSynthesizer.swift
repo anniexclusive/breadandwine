@@ -26,7 +26,7 @@ class SpeechSynthesizer: NSObject, ObservableObject, AVSpeechSynthesizerDelegate
         } else {
             let utterance = AVSpeechUtterance(string: text)
             utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")
-            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.75
+            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.65 
             synthesizer.speak(utterance)
         }
         isSpeaking = true

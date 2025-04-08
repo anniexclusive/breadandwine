@@ -21,7 +21,6 @@ struct DevotionalDetailView: View {
         guard let urlString = devotional.yoastHeadJson?.ogImage?.first?.url else { return nil }
         return URL(string: urlString)
     }
-//    @State private var formattedContent = NSAttributedString()
     
     var body: some View {
         ScrollView {
@@ -117,7 +116,7 @@ struct DevotionalDetailView: View {
         isLoadingText = true
         DispatchQueue.global(qos: .userInitiated).async {
             let combinedHTML = [
-                "Welcome to the devotional for",
+                "Welcome to the bread and wine devotional for",
                 devotional.formattedDate,
                 ";topic;",
                 devotional.title.rendered,

@@ -30,7 +30,7 @@ class DevotionalViewModel: ObservableObject {
                 switch result {
                 case .success(let devotionals):
                     self?.devotionals = devotionals
-//                    self?.cacheDevotionals(devotionals)
+                    self?.cacheDevotionals(devotionals)
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription
                 }
@@ -38,11 +38,11 @@ class DevotionalViewModel: ObservableObject {
         }
     }
     
-//    private func cacheDevotionals(_ devotionals: [Devotional]) {
-//        if let encoded = try? JSONEncoder().encode(devotionals) {
-//            UserDefaults.standard.set(encoded, forKey: cacheKey)
-//        }
-//    }
+    private func cacheDevotionals(_ devotionals: [Devotional]) {
+        if let encoded = try? JSONEncoder().encode(devotionals) {
+            UserDefaults.standard.set(encoded, forKey: cacheKey)
+        }
+    }
 //        
     private func loadCachedDevotionals() {
         if let data = UserDefaults.standard.data(forKey: cacheKey),

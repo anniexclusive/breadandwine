@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 // Devotional Model
-struct Devotional: Identifiable, Decodable {
+struct Devotional: Identifiable, Codable {
     let id: Int
     let date: String // Date is at the ROOT level, not in acf
     let title: Title
@@ -18,11 +18,11 @@ struct Devotional: Identifiable, Decodable {
     let acf: ACF?
     let yoastHeadJson: YoastHeadJSON?  // New Yoast SEO data
     
-    struct Title: Decodable {
+    struct Title: Codable {
             let rendered: String
         }
 
-    struct Content: Decodable {
+    struct Content: Codable {
         let rendered: String
 
         enum CodingKeys: String, CodingKey {
@@ -32,6 +32,11 @@ struct Devotional: Identifiable, Decodable {
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             rendered = try container.decodeIfPresent(String.self, forKey: .rendered) ?? ""
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(rendered, forKey: .rendered)
         }
     }
     struct ACF: Codable {
@@ -73,7 +78,8 @@ struct Devotional: Identifiable, Decodable {
         }
         
         let displayFormatter = DateFormatter()
-        displayFormatter.dateStyle = .medium
+//        displayFormatter.dateStyle = .short
+        displayFormatter.dateFormat = "d MMMM yyyy"
         return displayFormatter.string(from: date)
     }
     

@@ -44,22 +44,22 @@ struct RootView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             UnifiedMenuView(selectedCategory: $selectedCategory, showMenu: .constant(false), columnVisibility: $columnVisibility)
                 .navigationSplitViewColumnWidth(ideal: 320)
-                .background(ColorTheme.background)
+                .toolbar(.hidden, for: .navigationBar)
         } detail: {
             NavigationStack {
                 mainContentView
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            menuButton
-                        }
-                    }
+                    
                     .navigationBarTitleDisplayMode(.inline)
             }
         }
-//        .toolbar(.hidden, for: .navigationBar)
-        .navigationSplitViewStyle(.balanced)
+        .navigationSplitViewStyle(.prominentDetail) // Prevents default sidebar toggle behavior
+        .toolbarRole(.editor) // Avoids SwiftUI auto-inserting its own buttons
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                menuButton
+            }
+        }
         .accentColor(themeTintColor)
-        .onAppear(perform: setupNavigationBarAppearance)
     }
         
     private var iPhoneLayout: some View {
@@ -75,13 +75,15 @@ struct RootView: View {
                 
                 if showMenu {
                     UnifiedMenuView(selectedCategory: $selectedCategory, showMenu: $showMenu, columnVisibility: $columnVisibility)
-                        .frame(width: UIScreen.main.bounds.width * 0.75)
+                        .frame(width: UIScreen.main.bounds.width * 0.65)
                         .transition(.move(edge: .leading))
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    menuButton
+                if !showMenu {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        menuButton
+                    }
                 }
             }
             .gesture(
@@ -97,7 +99,7 @@ struct RootView: View {
             )
         }
         .accentColor(themeTintColor)
-        .onAppear(perform: setupNavigationBarAppearance)
+//        .onAppear(perform: setupNavigationBarAppearance)
         .navigationViewStyle(.stack)
     }
         
@@ -105,13 +107,13 @@ struct RootView: View {
         TabView(selection: $selectedTab) {
             DevotionalListView(viewModel: viewModel)
                 .tabItem {
-                    Label("Bread and Wine Devotionals", systemImage: "book.fill")
+                    Label("Devotionals", systemImage: "book.fill")
                 }
                 .tag(0)
             
             NuggetsListView(viewModel: viewModel)
                 .tabItem {
-                    Label("Nuggets", systemImage: "info.circle.fill")
+                    Label("Nuggets", systemImage: "lightbulb.fill")
                 }
                 .tag(1)
         }

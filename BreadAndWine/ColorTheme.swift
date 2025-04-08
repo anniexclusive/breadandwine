@@ -19,6 +19,7 @@ struct ColorTheme {
     static let textSecondary = Color(light: Color(red: 0.4, green: 0.4, blue: 0.4), dark: Color(red: 0.8, green: 0.8, blue: 0.8))
     static let cardBackground = Color(light: .white, dark: Color(red: 0.2, green: 0.2, blue: 0.2))
     static let accentPrimary = Color(light: Color(red: 0.2, green: 0.4, blue: 0.8), dark: Color(red: 0.4, green: 0.6, blue: 1.0))
+    static let navBar = Color(light: Color(red: 0.45, green: 0.55, blue: 0.82), dark: Color(red: 0.1, green: 0.1, blue: 0.1))
 }
 
 extension Color {
