@@ -12,6 +12,7 @@ class DevotionalViewModel: ObservableObject {
     @Published var devotionals: [Devotional] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    static let shared = DevotionalViewModel()
     
     private let cacheKey = "cachedDevotionals"
     
@@ -19,6 +20,10 @@ class DevotionalViewModel: ObservableObject {
             loadCachedDevotionals()
             fetchDevotionals()
         }
+    
+    func refreshDevotionals() {
+        fetchDevotionals()
+    }
     
     func fetchDevotionals() {
         isLoading = true
@@ -35,6 +40,20 @@ class DevotionalViewModel: ObservableObject {
                     self?.errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+    
+    func fetchTodayDevotional() -> Devotional? {
+        // Get today's date in the same format as the devotional dates
+        let today = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayString = formatter.string(from: today)
+        
+        // Find the devotional that matches today's date
+        // This assumes the date string starts with the yyyy-MM-dd format
+        return devotionals.first { devotional in
+            devotional.date.starts(with: todayString)
         }
     }
     

@@ -5,64 +5,126 @@
 //  Created by Anne Ezurike on 04.04.25.
 //
 
+// NotificationSettingsView.swift
 import SwiftUI
 
 struct SettingsView: View {
-    @Binding var isDarkMode: Bool
-    @State private var isNotificationsEnabled = false
+    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+    @State private var morningEnabled = UserDefaults.standard.bool(forKey: "morningNotificationsEnabled")
+    @State private var nuggetEnabled = UserDefaults.standard.bool(forKey: "nuggetNotificationsEnabled")
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Appearance")) {
-                    Toggle("Dark Mode", isOn: $isDarkMode)
-                }
-                
-                Section(header: Text("Notifications")) {
-                    Toggle("Daily Devotional Reminder", isOn: $isNotificationsEnabled)
-                        .onChange(of: isNotificationsEnabled) { newValue in
-                            if newValue {
-                                requestNotificationPermission()
-                            }
+        Form {
+            Section(header: Text("Push Notifications")) {
+                Toggle("Enable All Notifications", isOn: $notificationsEnabled)
+                    .onChange(of: notificationsEnabled) { newValue in
+                        if newValue {
+                            requestNotificationPermission()
+                        } else {
+                            // Turn off all notifications
+                            morningEnabled = false
+                            nuggetEnabled = false
+                            NotificationManager.shared.toggleAllNotifications(false)
                         }
-                }
+                    }
                 
-                Section(header: Text("About")) {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.secondary)
+                if notificationsEnabled {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Toggle("Morning Reminder (6 AM)", isOn: $morningEnabled)
+                            .onChange(of: morningEnabled) { newValue in
+                                NotificationManager.shared.toggleMorningNotifications(newValue)
+                            }
+                        
+                        Toggle("Daily Nugget (2 PM)", isOn: $nuggetEnabled)
+                            .onChange(of: nuggetEnabled) { newValue in
+                                NotificationManager.shared.toggleNuggetNotifications(newValue)
+                            }
                     }
                 }
             }
-            .navigationTitle("Settings")
+            
+            Section(header: Text("About Notifications"), footer: Text("You can manage notification permissions in the Settings app.")) {
+                Button("Open System Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString),
+                       UIApplication.shared.canOpenURL(url) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            }
+            Section(header: Text("About")) {
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text("1.0.0")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .onAppear {
+            checkNotificationStatus()
+        }
+        .navigationTitle("Settings")
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Notification Permission"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+    }
+    
+    private func checkNotificationStatus() {
+        NotificationManager.shared.checkNotificationSettings { enabled in
+            self.notificationsEnabled = enabled
+            self.morningEnabled = UserDefaults.standard.bool(forKey: "morningNotificationsEnabled")
+            self.nuggetEnabled = UserDefaults.standard.bool(forKey: "nuggetNotificationsEnabled")
         }
     }
     
     private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
-            if success {
-                scheduleNotification()
-            } else if let error = error {
-                print("Error requesting notification permission: \(error.localizedDescription)")
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                switch settings.authorizationStatus {
+                case .denied:
+                    // User previously denied - prompt to go to settings
+                    self.notificationsEnabled = false
+                    self.alertMessage = "Notifications are disabled. Please enable them in the Settings app."
+                    self.showAlert = true
+                    
+                case .notDetermined:
+                    // Request permission
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+                        DispatchQueue.main.async {
+                            self.notificationsEnabled = granted
+                            if granted {
+                                UIApplication.shared.registerForRemoteNotifications()
+                                NotificationManager.shared.scheduleNotifications()
+                            } else {
+                                self.alertMessage = "You've declined notification permissions. You can enable them in the Settings app."
+                                self.showAlert = true
+                            }
+                        }
+                    }
+                    
+                case .authorized, .provisional, .ephemeral:
+                    // Already authorized - enable and schedule notifications
+                    NotificationManager.shared.toggleAllNotifications(true)
+                    
+                @unknown default:
+                    break
+                }
             }
         }
     }
-    
-    private func scheduleNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Daily Devotional"
-        content.body = "Your daily devotional is ready to read!"
-        content.sound = .default
-        
-        var dateComponents = DateComponents()
-        dateComponents.hour = 6
-        dateComponents.minute = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "dailyDevotionalReminder", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request)
+}
+
+// Preview provider
+struct NotificationSettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            SettingsView()
+        }
     }
 }

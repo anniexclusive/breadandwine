@@ -47,9 +47,13 @@ struct RootView: View {
                 .toolbar(.hidden, for: .navigationBar)
         } detail: {
             NavigationStack {
-                mainContentView
-                    
-                    .navigationBarTitleDisplayMode(.inline)
+                switch selectedCategory {
+                case .settings:
+                    SettingsView()
+                default:
+                    mainContentView
+                        .navigationBarTitleDisplayMode(.inline)
+                }
             }
         }
         .navigationSplitViewStyle(.prominentDetail) // Prevents default sidebar toggle behavior
@@ -65,9 +69,14 @@ struct RootView: View {
     private var iPhoneLayout: some View {
         NavigationView {
             ZStack(alignment: .leading) {
-                mainContentView
-                    .disabled(showMenu)
-                    .blur(radius: showMenu ? 2 : 0)
+                switch selectedCategory {
+                case .settings:
+                    SettingsView()
+                default:
+                    mainContentView
+                        .disabled(showMenu)
+                        .blur(radius: showMenu ? 2 : 0)
+                }
                 
                 Color.black.opacity(showMenu ? 0.4 : 0)
                     .ignoresSafeArea()

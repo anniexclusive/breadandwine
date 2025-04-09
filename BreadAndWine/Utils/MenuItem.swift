@@ -8,5 +8,6 @@
 
 enum MenuItem: String, CaseIterable, Identifiable {
     case devotions
+    case settings
     var id: String { rawValue }
 }

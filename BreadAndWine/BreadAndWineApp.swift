@@ -11,6 +11,9 @@ import AVKit
 @main
 struct BreadAndWineApp: App {
     @State private var showSplash = true
+    @AppStorage("lastUpdateCheck") private var lastUpdateCheck: Double = 0
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     init() {
         configureAudioSession()
     }
@@ -31,6 +34,7 @@ struct BreadAndWineApp: App {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     showSplash = false
                 }
+                checkForUpdates()
             }
         }
     }
@@ -41,5 +45,18 @@ struct BreadAndWineApp: App {
             mode: .spokenAudio,
             options: [.duckOthers, .interruptSpokenAudioAndMixWithOthers]
         )
+    }
+    
+    private func checkForUpdates() {
+        let currentTime = Date().timeIntervalSince1970
+        let twentyFourHours: TimeInterval = 86400
+        
+        if currentTime - lastUpdateCheck > twentyFourHours {
+            // Trigger updates
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshDevotionalContent"), object: nil)
+                lastUpdateCheck = currentTime
+            }
+        }
     }
 }

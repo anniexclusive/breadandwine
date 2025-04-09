@@ -11,6 +11,7 @@ struct UnifiedMenuView: View {
     @Binding var showMenu: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Binding var columnVisibility: NavigationSplitViewVisibility
+    @State private var showAboutAlert = false
     
     private enum URLs {
         static let archives = "https://breadandwinedevotional.com/devotional/"
@@ -43,7 +44,8 @@ struct UnifiedMenuView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, sizeClass == .regular ? 40 : 0)
+        .padding(.top, sizeClass == .regular ? 40 : 10)
+        .padding(.bottom, sizeClass == .regular ? 0 : 20)
 //        .padding(.horizontal)
     }
     
@@ -70,8 +72,24 @@ struct UnifiedMenuView: View {
             socialSection
             liveStreamSection
             otherSection
+            Section {
+                aboutButton
+            }
         }
+        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .listStyle(.sidebar)
+        .alert("About App", isPresented: $showAboutAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("""
+                Bread and Wine Devotional \(Bundle.main.appVersion)
+                
+                © \(Calendar.current.component(.year, from: Date())) First Love Ministries. 
+                All rights reserved.
+                
+                Contact: info@example.com
+                """)
+            }
     }
     
     // New iPad-specific URL button builder
@@ -86,7 +104,7 @@ struct UnifiedMenuView: View {
     // MARK: - iPhone Layout
     private var phoneMenuContent: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 15) {
                 Section(header: sectionHeader("Daily Devotional")) {
                     menuButton(title: "Bread and Wine", icon: "book.fill") {
                         selectedCategory = .devotions
@@ -99,10 +117,24 @@ struct UnifiedMenuView: View {
                 socialSection
                 liveStreamSection
                 otherSection
+                aboutButton
+                    .padding(.horizontal)
             }
             .padding(.horizontal)
-            .padding(.top, 20)
+            .padding(.top, 7)
         }
+        .alert("About App", isPresented: $showAboutAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("""
+                Bread and Wine Devotional \(Bundle.main.appVersion)
+                
+                © \(Calendar.current.component(.year, from: Date())) First Love Ministries. 
+                All rights reserved.
+                
+                Contact: info@example.com
+                """)
+            }
     }
     
     // MARK: - Reusable Components
@@ -142,6 +174,9 @@ struct UnifiedMenuView: View {
             menuButton(title: "Privacy Policy", icon: "lock.fill") {
                 openURL(URLs.privacy)
             }
+            menuButton(title: "Settings", icon: "gearshape.fill") {
+                selectedCategory = .settings
+            }
         }
     }
     
@@ -151,12 +186,30 @@ struct UnifiedMenuView: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .padding(.vertical, 8)
-            .padding(.top, 15)
+            .padding(.top, 7)
     }
     
     private func openURL(_ string: String) {
         guard let url = URL(string: string) else { return }
         UIApplication.shared.open(url)
+    }
+    
+    private var aboutButton: some View {
+        Button {
+            showAboutAlert = true
+        } label: {
+            Text("About")
+                .font(.system(size: 16, weight: .medium))
+                .padding(.vertical, 12)
+                .padding(.horizontal, 30)
+                .background(Color.clear)
+                .foregroundColor(ColorTheme.accentPrimary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(ColorTheme.textPrimary, lineWidth: 1)
+                )
+        }
+        .padding(.vertical, 6)
     }
 }
 
@@ -177,9 +230,16 @@ struct MenuRow: View {
             
             Spacer()
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 2)
         .contentShape(Rectangle())
         .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
         .cornerRadius(8)
+    }
+}
+
+// Add this extension for version number
+extension Bundle {
+    var appVersion: String {
+        return (infoDictionary?["CFBundleShortVersionString"] as? String) ?? "1.0.0"
     }
 }
