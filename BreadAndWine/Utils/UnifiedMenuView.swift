@@ -123,13 +123,13 @@ struct UnifiedMenuView: View {
             .padding(.horizontal)
             .padding(.top, 7)
         }
-        .alert("About App", isPresented: $showAboutAlert) {
+        .alert("About", isPresented: $showAboutAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text("""
                 Bread and Wine Devotional \(Bundle.main.appVersion)
                 
-                © \(Calendar.current.component(.year, from: Date())) First Love Ministries. 
+                © \(Calendar.current.component(.year, from: Date())) Firstlove Assembly. 
                 All rights reserved.
                 
                 Contact: info@example.com
@@ -169,7 +169,7 @@ struct UnifiedMenuView: View {
                 openURL(URLs.appStore)
             }
             menuButton(title: "Feedback", icon: "envelope.fill") {
-                openURL("mailto:feedback@example.com")
+                openURL("mailto:info@breadandwinedevotional.com")
             }
             menuButton(title: "Privacy Policy", icon: "lock.fill") {
                 openURL(URLs.privacy)

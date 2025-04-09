@@ -81,26 +81,30 @@ class NotificationManager {
         }
     }
     
-    // Schedule 2 PM daily nugget
+    // Schedule 10am daily nugget
     func scheduleDailyNugget() {
         // Get today's devotional content first to extract the nugget
+        print("Attempting to schedule nugget notification...")
         if let todayDevotional = DevotionalViewModel.shared.fetchTodayDevotional() {
+            print("Devotional found:", todayDevotional)
             
             let content = UNMutableNotificationContent()
             content.title = "Daily Nugget"
             
             if let nugget = todayDevotional.acf?.nugget {
+                print("nugget is: \(nugget)")
                 content.body = nugget
             } else {
                 // Fallback if no nugget is available
                 content.body = "Reflect on today's devotional message"
+                print("nugget not found")
             }
             
             content.sound = UNNotificationSound.default
             
-            // Create 2 PM trigger
+            // Create 10am trigger
             var dateComponents = DateComponents()
-            dateComponents.hour = 14
+            dateComponents.hour = 10
             dateComponents.minute = 0
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
             
@@ -111,46 +115,49 @@ class NotificationManager {
             UNUserNotificationCenter.current().add(request) { error in
                 if let error = error {
                     print("Error scheduling nugget notification: \(error)")
-                } else {
-                    print("Successfully scheduled nugget notification for 2 PM")
                 }
             }
+        } else {
+            print("No devotional found for today")
         }
     }
     
     // MARK: - Background Refreshing
     
     func refreshNuggetNotificationContent() {
-        // Cancel existing nugget notification
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["nuggetNotification"])
-        
-        // Fetch fresh devotional data
-        let success = DevotionalViewModel.shared.refreshDevotionals
+        // This could be called from background fetch
+        APIService.shared.fetchDevotionals { [weak self] result in
+            guard let self = self, case .success(let devotionals) = result else { return }
             
-//            if success {
-//                // Schedule with updated content
-//                self.scheduleDailyNugget()
-//                print("Successfully refreshed nugget notification content")
-//            } else {
-//                // If refresh failed, still schedule with whatever data we have
-//                self.scheduleDailyNugget()
-//                print("Failed to refresh devotional data, scheduled nugget with existing data")
-//            }
+            let today = Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "d MMMM yyyy"
+            let todayString = formatter.string(from: today)
+            
+            let devotional = devotionals.first { devotional in
+                devotional.date.starts(with: todayString)
+            }
+            
+            // Update the scheduled notification with fresh content
+            self.updateNuggetNotification(with: devotional)
+            
+            
         }
+    }
 
-    private func updateNuggetNotification(with devotional: Devotional) {
+    private func updateNuggetNotification(with devotional: Devotional?) {
         let content = UNMutableNotificationContent()
         content.title = "Daily Nugget"
-        content.body = devotional.acf?.nugget ?? "No nugget available"
+        content.body = devotional?.acf?.nugget ?? ""
         content.sound = .default
         content.userInfo = [
             "notificationType": "nugget",
-            "devotionalId": devotional.id
+            "devotionalId": devotional?.id ?? 0
         ]
         
-        // Create 2 PM trigger (keeping the same time)
+        // Create 10 am trigger (keeping the same time)
         var dateComponents = DateComponents()
-        dateComponents.hour = 14
+        dateComponents.hour = 10
         dateComponents.minute = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         

@@ -14,7 +14,10 @@ struct RootView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @SceneStorage("selectedCategory") private var selectedCategory: MenuItem?
+    @State private var selectedCategory: MenuItem?
+    
+    @State private var selectedDevotionalId: String? = nil
+    @State private var navigateToDevotional = false
     
     private var menuButton: some View {
         Button {
@@ -108,7 +111,6 @@ struct RootView: View {
             )
         }
         .accentColor(themeTintColor)
-//        .onAppear(perform: setupNavigationBarAppearance)
         .navigationViewStyle(.stack)
     }
         
@@ -119,6 +121,16 @@ struct RootView: View {
                     Label("Devotionals", systemImage: "book.fill")
                 }
                 .tag(0)
+                .navigationDestination(isPresented: $navigateToDevotional) {
+                    if let id = selectedDevotionalId,
+                       let devotional = viewModel.getDevotionalById(id) {
+                        DevotionalDetailView(devotional: devotional)
+                    } else if let todayDevotional = viewModel.fetchTodayDevotional() {
+                        DevotionalDetailView(devotional: todayDevotional)
+                    } else {
+                        Text("Devotional not available")
+                    }
+                }
             
             NuggetsListView(viewModel: viewModel)
                 .tabItem {

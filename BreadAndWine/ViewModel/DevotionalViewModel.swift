@@ -47,14 +47,18 @@ class DevotionalViewModel: ObservableObject {
         // Get today's date in the same format as the devotional dates
         let today = Date()
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.dateFormat = "d MMMM yyyy"
         let todayString = formatter.string(from: today)
         
         // Find the devotional that matches today's date
         // This assumes the date string starts with the yyyy-MM-dd format
         return devotionals.first { devotional in
-            devotional.date.starts(with: todayString)
+            devotional.formattedDate.starts(with: todayString)
         }
+    }
+    
+    func getDevotionalById(_ id: String) -> Devotional? {
+        return devotionals.first { $0.id == Int(id) }
     }
     
     private func cacheDevotionals(_ devotionals: [Devotional]) {

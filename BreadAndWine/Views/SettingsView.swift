@@ -32,12 +32,12 @@ struct SettingsView: View {
                 
                 if notificationsEnabled {
                     VStack(alignment: .leading, spacing: 20) {
-                        Toggle("Morning Reminder (6 AM)", isOn: $morningEnabled)
+                        Toggle("Morning Reminder", isOn: $morningEnabled)
                             .onChange(of: morningEnabled) { newValue in
                                 NotificationManager.shared.toggleMorningNotifications(newValue)
                             }
                         
-                        Toggle("Daily Nugget (2 PM)", isOn: $nuggetEnabled)
+                        Toggle("Daily Nugget", isOn: $nuggetEnabled)
                             .onChange(of: nuggetEnabled) { newValue in
                                 NotificationManager.shared.toggleNuggetNotifications(newValue)
                             }
@@ -66,6 +66,7 @@ struct SettingsView: View {
             checkNotificationStatus()
         }
         .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: $showAlert) {
             Alert(
                 title: Text("Notification Permission"),

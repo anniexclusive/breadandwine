@@ -21,6 +21,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Set up notifications
         setupNotifications(application)
         
+        // Register for background tasks
+        BackgroundFetchManager.shared.registerBackgroundTasks()
+                
+        // Schedule initial background fetch
+        BackgroundFetchManager.shared.scheduleBackgroundFetch()
+        
         return true
     }
     
@@ -87,7 +93,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else { return }
-        print("Firebase token: \(token)")
         
         // Store directly in Firebase
         DeviceManager.shared.saveDeviceToken(token)
