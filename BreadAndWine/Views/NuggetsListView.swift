@@ -47,5 +47,6 @@ struct NuggetsListView: View {
             }
             .background(ColorTheme.background)
         }
+        .navigationViewStyle(.stack)
     }
 }
