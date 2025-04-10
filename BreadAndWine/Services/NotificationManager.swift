@@ -59,7 +59,7 @@ class NotificationManager {
     // Schedule 6 AM morning reminder
     func scheduleMorningReminder() {
         let content = UNMutableNotificationContent()
-        content.title = "Morning Devotional"
+        content.title = "Bread and Wine Devotional"
         content.body = "Refresh your spirit—your devotional awaits!"
         content.sound = .default
         content.userInfo = ["notificationType": "morning"]

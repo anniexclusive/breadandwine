@@ -17,7 +17,7 @@ struct UnifiedMenuView: View {
         static let archives = "https://breadandwinedevotional.com/devotional/"
         static let social = "https://www.facebook.com/flarumuokwuta/"
         static let youtube = "https://www.youtube.com/@flarumuokwuta/streams"
-        static let appStore = "itms-apps://apple.com/app/idYOUR_APP_ID"
+        static let appStore = "https://apps.apple.com/us/app/breadandwine-devotional/id6744418220"
         static let privacy = "https://breadandwinedevotional.com/privacy-policy"
     }
     
