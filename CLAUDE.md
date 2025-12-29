@@ -330,16 +330,16 @@ devices/{fcm_token}
 **Problem:** Permission prompt never appears
 **Solution:** Delete app and reinstall. Permissions are one-time per install.
 
-## Testing Philosophy
+## Testing
 
-**Current Status:** UI Tests and Unit Tests targets exist but have minimal coverage.
+**Coverage:** ~25% (14 tests)
 
-**When Adding Tests:**
-- Use XCTest framework
-- Test ViewModels separately from Views
-- Mock APIService for ViewModel tests
-- Test date formatting edge cases (timezone issues)
-- UI tests for critical flows: launch → view devotional → TTS playback
+**Framework:** Swift Testing (modern, requires iOS 16+)
+
+**What's Tested:**
+- Devotional model (date parsing, ACF fields, content)
+- DevotionalViewModel (search, caching, today's devotional)
+- Singleton managers and configuration
 
 **Run Tests:**
 ```bash
@@ -347,6 +347,27 @@ xcodebuild test -project BreadAndWine.xcodeproj \
   -scheme BreadAndWine \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
+
+**Adding Tests:**
+```swift
+import Testing
+@testable import BreadAndWine
+
+struct MyTests {
+    @Test func myTestName() throws {
+        // Given
+        let value = "test"
+
+        // When/Then
+        #expect(value == "test")
+    }
+}
+```
+
+**Guidelines:**
+- Focus on business logic, not UI
+- Test error handling and edge cases
+- Keep tests simple and readable
 
 ## Swift Package Dependencies
 

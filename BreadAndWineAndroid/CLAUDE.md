@@ -164,13 +164,24 @@ adb shell su root date 110610002025.00  # Nov 6 10:00 2025
 - **DataStore errors** → Wrap in try-catch, defaults are acceptable
 - **Date parsing fails** → Ensure desugaring enabled in build.gradle.kts
 
-## Testing Philosophy
+## Testing
 
-- **Unit tests** for ViewModels and data models (23 tests currently)
-- Use MockK for mocking Android framework classes
-- Test files mirror source structure: `SettingsViewModel.kt` → `SettingsViewModelTest.kt`
-- Don't over-engineer tests - simple Given-When-Then structure
-- See `app/src/test/README.md` for testing guide
+**Coverage:** ~65% (45 tests)
+
+**What's Tested:**
+- DevotionalViewModel and Repository (date logic, API errors, today's nugget)
+- Notification scheduling and settings
+- Devotional model (parsing, ACF fields, preview text)
+- ApiService result types
+- Cache persistence
+
+**Framework:** JUnit + MockK + Kotlin Test
+
+**Guidelines:**
+- Use Given-When-Then structure
+- Test files mirror source: `SettingsViewModel.kt` → `SettingsViewModelTest.kt`
+- Mock Android framework classes with MockK
+- Keep tests simple and focused on business logic
 
 ## Code Style & Conventions
 
