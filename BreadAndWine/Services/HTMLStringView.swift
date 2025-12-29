@@ -17,7 +17,10 @@ struct HTMLStringView: UIViewRepresentable {
     @Environment(\.colorScheme) private var colorScheme
     
     func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
+        let config = WKWebViewConfiguration()
+        config.preferences.javaScriptEnabled = false  // Disable JavaScript for security
+
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.backgroundColor = .clear
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false // Disable internal scrolling

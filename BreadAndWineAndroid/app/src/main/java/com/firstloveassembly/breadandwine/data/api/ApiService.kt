@@ -1,6 +1,5 @@
 package com.firstloveassembly.breadandwine.data.api
 
-import com.firstloveassembly.breadandwine.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -14,13 +13,14 @@ import java.util.concurrent.TimeUnit
 object ApiService {
 
     private const val BASE_URL = "https://breadandwinedevotional.com/wp-json/wp/v2/"
+    private const val ENABLE_LOGGING = false  // Set to false for production
 
     /**
-     * OkHttp client with conditional logging (DEBUG-only)
+     * OkHttp client with minimal logging (production-safe)
      */
     private val okHttpClient = OkHttpClient.Builder()
         .apply {
-            if (BuildConfig.DEBUG) {
+            if (ENABLE_LOGGING) {
                 addInterceptor(
                     HttpLoggingInterceptor().apply {
                         level = HttpLoggingInterceptor.Level.BASIC
