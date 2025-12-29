@@ -105,4 +105,75 @@ struct BreadAndWineTests {
         #expect(devotional.acf?.nugget == "Today's nugget")
     }
 
+    @Test func backgroundFetchManagerIsSingleton() {
+        // Given BackgroundFetchManager
+        let manager1 = BackgroundFetchManager.shared
+        let manager2 = BackgroundFetchManager.shared
+
+        // Then same instance
+        #expect(manager1 === manager2)
+    }
+
+    @Test func notificationManagerIsSingleton() {
+        // Given NotificationManager
+        let manager1 = NotificationManager.shared
+        let manager2 = NotificationManager.shared
+
+        // Then same instance
+        #expect(manager1 === manager2)
+    }
+
+    @Test func devotionalContentIsNotEmpty() throws {
+        // Given devotional with content
+        let content = Content(rendered: "<p>Today's message</p>")
+
+        // Then content is accessible
+        #expect(!content.rendered.isEmpty)
+        #expect(content.rendered.contains("message"))
+    }
+
+    @Test func devotionalBannerImageFromYoast() throws {
+        // Given devotional with yoast image
+        let ogImage = OGImage(url: "https://example.com/image.jpg")
+        let yoast = YoastHeadJSON(ogImage: [ogImage])
+
+        let devotional = Devotional(
+            id: 1,
+            date: "2024-01-01T00:00:00",
+            title: Title(rendered: "Test"),
+            content: Content(rendered: "Content"),
+            acf: nil,
+            yoastHeadJson: yoast
+        )
+
+        // Then image URL is accessible
+        #expect(devotional.yoastHeadJson?.ogImage?.first?.url == "https://example.com/image.jpg")
+    }
+
+    @Test func appConstantsHaveValues() {
+        // Given AppConstants
+        // When accessing constants
+        let identifier = AppConstants.Notifications.backgroundFetchIdentifier
+        let morningHour = AppConstants.Notifications.Time.morningHour
+        let nuggetHour = AppConstants.Notifications.Time.nuggetHour
+
+        // Then values are defined
+        #expect(!identifier.isEmpty)
+        #expect(morningHour >= 0 && morningHour < 24)
+        #expect(nuggetHour >= 0 && nuggetHour < 24)
+    }
+
+    @Test func colorThemeHasColors() {
+        // Given ColorTheme
+        // When accessing colors
+        let primary = ColorTheme.primary
+        let background = ColorTheme.background
+        let textPrimary = ColorTheme.textPrimary
+
+        // Then colors exist
+        #expect(primary != nil)
+        #expect(background != nil)
+        #expect(textPrimary != nil)
+    }
+
 }
