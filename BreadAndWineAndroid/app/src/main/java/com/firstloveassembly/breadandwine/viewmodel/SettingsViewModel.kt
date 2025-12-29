@@ -3,7 +3,9 @@ package com.firstloveassembly.breadandwine.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.firstloveassembly.breadandwine.data.api.ApiService
 import com.firstloveassembly.breadandwine.data.cache.DevotionalCache
+import com.firstloveassembly.breadandwine.data.repository.DevotionalRepository
 import com.firstloveassembly.breadandwine.service.NotificationScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,10 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val cache = DevotionalCache(application)
+    private val repository = DevotionalRepository(
+        api = ApiService.api,
+        cache = cache
+    )
     private val context = application.applicationContext
 
     private val _notificationsEnabled = MutableStateFlow(true)
@@ -65,7 +71,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     NotificationScheduler.scheduleMorningNotification(context)
                 }
                 if (_nuggetNotificationsEnabled.value) {
-                    NotificationScheduler.scheduleNuggetNotification(context)
+                    // Fetch today's nugget before scheduling
+                    viewModelScope.launch {
+                        val nugget = repository.getTodaysNugget()
+                        NotificationScheduler.scheduleNuggetNotification(context, nugget)
+                    }
                 }
             } else {
                 // Cancel all notifications
@@ -108,7 +118,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
         try {
             if (enabled && _notificationsEnabled.value) {
-                NotificationScheduler.scheduleNuggetNotification(context)
+                // Fetch today's nugget before scheduling
+                viewModelScope.launch {
+                    val nugget = repository.getTodaysNugget()
+                    NotificationScheduler.scheduleNuggetNotification(context, nugget)
+                }
             } else {
                 NotificationScheduler.cancelNuggetNotification(context)
             }
