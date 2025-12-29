@@ -22,10 +22,9 @@ object DeviceTokenManager {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
-                Log.d(TAG, "FCM Token: $token")
                 saveDeviceToken(context, token)
             } else {
-                Log.e(TAG, "Failed to get FCM token", task.exception)
+                Log.e(TAG, "Failed to get FCM token")
             }
         }
     }
@@ -47,11 +46,8 @@ object DeviceTokenManager {
         db.collection(COLLECTION_DEVICES)
             .document(token)
             .set(deviceData)
-            .addOnSuccessListener {
-                Log.d(TAG, "Device token saved successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to save device token", e)
+            .addOnFailureListener {
+                Log.e(TAG, "Failed to save device token")
             }
     }
 
@@ -64,11 +60,8 @@ object DeviceTokenManager {
         db.collection(COLLECTION_DEVICES)
             .document(token)
             .delete()
-            .addOnSuccessListener {
-                Log.d(TAG, "Device token deleted successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to delete device token", e)
+            .addOnFailureListener {
+                Log.e(TAG, "Failed to delete device token")
             }
     }
 }

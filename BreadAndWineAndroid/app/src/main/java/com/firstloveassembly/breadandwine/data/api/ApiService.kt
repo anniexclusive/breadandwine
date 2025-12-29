@@ -1,5 +1,6 @@
 package com.firstloveassembly.breadandwine.data.api
 
+import com.firstloveassembly.breadandwine.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -15,14 +16,18 @@ object ApiService {
     private const val BASE_URL = "https://breadandwinedevotional.com/wp-json/wp/v2/"
 
     /**
-     * OkHttp client with logging
+     * OkHttp client with conditional logging (DEBUG-only)
      */
     private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+        .apply {
+            if (BuildConfig.DEBUG) {
+                addInterceptor(
+                    HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BASIC
+                    }
+                )
             }
-        )
+        }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)

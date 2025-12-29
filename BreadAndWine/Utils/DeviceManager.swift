@@ -29,9 +29,8 @@ class DeviceManager {
             "lastActive": FieldValue.serverTimestamp()
         ], merge: true) { error in
             if let error = error {
-                print("Error saving token: \(error)")
-            } else {
-                print("Device token saved to Firebase")
+                // Error occurred but don't log sensitive token info
+                NSLog("Failed to save device token")
             }
         }
     }
