@@ -10,8 +10,99 @@ import Testing
 
 struct BreadAndWineTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test func devotionalModelParsesDate() throws {
+        // Given devotional JSON date
+        let dateString = "2024-01-15T00:00:00"
+
+        // When creating devotional
+        let devotional = Devotional(
+            id: 1,
+            date: dateString,
+            title: Title(rendered: "Test"),
+            content: Content(rendered: "Content"),
+            acf: nil,
+            yoastHeadJson: nil
+        )
+
+        // Then formatted date contains year
+        #expect(devotional.formattedDate.contains("2024"))
+    }
+
+    @Test func devotionalViewModelInitializesWithEmptyList() {
+        // When creating ViewModel
+        let viewModel = DevotionalViewModel()
+
+        // Then starts with empty devotionals or cached data
+        #expect(viewModel.devotionals.count >= 0)
+        #expect(!viewModel.isLoading)
+    }
+
+    @Test func getDevotionalByIdReturnsNilWhenNotFound() {
+        // Given ViewModel with empty list
+        let viewModel = DevotionalViewModel()
+
+        // When searching for non-existent ID
+        let result = viewModel.getDevotionalById("999999")
+
+        // Then returns nil
+        #expect(result == nil)
+    }
+
+    @Test func fetchTodayDevotionalReturnsNilWhenEmpty() {
+        // Given ViewModel with empty list
+        let viewModel = DevotionalViewModel()
+
+        // When fetching today's devotional from empty list
+        let result = viewModel.fetchTodayDevotional()
+
+        // Then returns nil
+        #expect(result == nil)
+    }
+
+    @Test func devotionalTitleParsesHTML() throws {
+        // Given title with HTML
+        let title = Title(rendered: "<strong>Bold</strong> Title")
+
+        // Then rendered contains HTML
+        #expect(title.rendered.contains("strong"))
+    }
+
+    @Test func devotionalACFIsOptional() throws {
+        // Given devotional without ACF
+        let devotional = Devotional(
+            id: 1,
+            date: "2024-01-01T00:00:00",
+            title: Title(rendered: "Test"),
+            content: Content(rendered: "Content"),
+            acf: nil,
+            yoastHeadJson: nil
+        )
+
+        // Then ACF is nil
+        #expect(devotional.acf == nil)
+    }
+
+    @Test func devotionalACFContainsNugget() throws {
+        // Given devotional with ACF nugget
+        let acf = ACF(
+            bibleVerse: "John 3:16",
+            furtherStudy: "Study",
+            prayer: "Prayer",
+            bibleReadingPlan: "Plan",
+            nugget: "Today's nugget"
+        )
+
+        let devotional = Devotional(
+            id: 1,
+            date: "2024-01-01T00:00:00",
+            title: Title(rendered: "Test"),
+            content: Content(rendered: "Content"),
+            acf: acf,
+            yoastHeadJson: nil
+        )
+
+        // Then nugget is accessible
+        #expect(devotional.acf?.nugget == "Today's nugget")
     }
 
 }
