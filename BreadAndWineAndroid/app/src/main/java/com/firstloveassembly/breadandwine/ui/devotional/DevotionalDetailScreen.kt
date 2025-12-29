@@ -1,6 +1,7 @@
 package com.firstloveassembly.breadandwine.ui.devotional
 
 import android.content.Intent
+import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -377,8 +378,13 @@ private fun applyCustomStyling(spanned: Spanned, italicColor: Int, quoteColor: I
         val end = spanned.getSpanEnd(span)
         // Replace default QuoteSpan with custom colored one (10dp stripe width)
         spannable.removeSpan(span)
+        val customQuoteSpan = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            QuoteSpan(quoteColor, 10, 20) // color, stripe width (10dp like iOS), gap width
+        } else {
+            QuoteSpan(quoteColor) // API 24+ only supports color parameter
+        }
         spannable.setSpan(
-            QuoteSpan(quoteColor, 10, 20), // color, stripe width (10dp like iOS), gap width
+            customQuoteSpan,
             start,
             end,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
