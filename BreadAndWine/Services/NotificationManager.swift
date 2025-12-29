@@ -13,9 +13,9 @@ import UIKit
 
 class NotificationManager {
     static let shared = NotificationManager()
-    
-    private let morningIdentifier = "com.devotionalapp.morningReminder"
-    private let nuggetIdentifier = "com.devotionalapp.dailyNugget"
+
+    private let morningIdentifier = AppConstants.Notifications.morningIdentifier
+    private let nuggetIdentifier = AppConstants.Notifications.nuggetIdentifier
     
     private init() {}
     
@@ -24,13 +24,13 @@ class NotificationManager {
     func scheduleNotifications() {
         checkNotificationSettings { [weak self] enabled in
             guard let self = self, enabled else { return }
-            
+
             // Only schedule if user hasn't disabled in app settings
-            if UserDefaults.standard.bool(forKey: "morningNotificationsEnabled") {
+            if UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled) {
                 self.scheduleMorningReminder()
             }
-            
-            if UserDefaults.standard.bool(forKey: "nuggetNotificationsEnabled") {
+
+            if UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled) {
                 self.scheduleDailyNugget()
             }
         }
@@ -39,15 +39,15 @@ class NotificationManager {
     func checkNotificationSettings(completion: @escaping (Bool) -> Void) {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             let enabled = settings.authorizationStatus == .authorized
-            UserDefaults.standard.set(enabled, forKey: "notificationsEnabled")
-            
+            UserDefaults.standard.set(enabled, forKey: AppConstants.UserDefaultsKeys.notificationsEnabled)
+
             // Initialize default values if not set
-            if UserDefaults.standard.object(forKey: "morningNotificationsEnabled") == nil {
-                UserDefaults.standard.set(true, forKey: "morningNotificationsEnabled")
+            if UserDefaults.standard.object(forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled) == nil {
+                UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled)
             }
-            
-            if UserDefaults.standard.object(forKey: "nuggetNotificationsEnabled") == nil {
-                UserDefaults.standard.set(true, forKey: "nuggetNotificationsEnabled")
+
+            if UserDefaults.standard.object(forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled) == nil {
+                UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled)
             }
             
             DispatchQueue.main.async {
@@ -56,18 +56,18 @@ class NotificationManager {
         }
     }
     
-    // Schedule 6 AM morning reminder
+    // Schedule morning reminder
     func scheduleMorningReminder() {
         let content = UNMutableNotificationContent()
-        content.title = "Bread and Wine Devotional"
-        content.body = "Refresh your spirit—your devotional awaits!"
+        content.title = AppConstants.Notifications.Messages.morningTitle
+        content.body = AppConstants.Notifications.Messages.morningBody
         content.sound = .default
         content.userInfo = ["notificationType": "morning"]
-        
-        // Create 6 AM trigger
+
+        // Create morning trigger
         var dateComponents = DateComponents()
-        dateComponents.hour = 6
-        dateComponents.minute = 0
+        dateComponents.hour = AppConstants.Notifications.Time.morningHour
+        dateComponents.minute = AppConstants.Notifications.Time.morningMinute
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         
         // Create request
@@ -81,31 +81,31 @@ class NotificationManager {
         }
     }
     
-    // Schedule 10am daily nugget
+    // Schedule daily nugget
     func scheduleDailyNugget() {
         // Get today's devotional content first to extract the nugget
         print("Attempting to schedule nugget notification...")
         if let todayDevotional = DevotionalViewModel.shared.fetchTodayDevotional() {
             print("Devotional found:", todayDevotional)
-            
+
             let content = UNMutableNotificationContent()
-            content.title = "Daily Nugget"
-            
+            content.title = AppConstants.Notifications.Messages.nuggetTitle
+
             if let nugget = todayDevotional.acf?.nugget {
                 print("nugget is: \(nugget)")
                 content.body = nugget
             } else {
                 // Fallback if no nugget is available
-                content.body = "Reflect on today's devotional message"
+                content.body = AppConstants.Notifications.Messages.nuggetFallback
                 print("nugget not found")
             }
-            
+
             content.sound = UNNotificationSound.default
-            
-            // Create 10am trigger
+
+            // Create nugget trigger
             var dateComponents = DateComponents()
-            dateComponents.hour = 10
-            dateComponents.minute = 0
+            dateComponents.hour = AppConstants.Notifications.Time.nuggetHour
+            dateComponents.minute = AppConstants.Notifications.Time.nuggetMinute
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
             
             // Create request
@@ -131,7 +131,7 @@ class NotificationManager {
             
             let today = Date()
             let formatter = DateFormatter()
-            formatter.dateFormat = "d MMMM yyyy"
+            formatter.dateFormat = AppConstants.DateFormat.display
             let todayString = formatter.string(from: today)
             
             let devotional = devotionals.first { devotional in
@@ -147,18 +147,18 @@ class NotificationManager {
 
     private func updateNuggetNotification(with devotional: Devotional?) {
         let content = UNMutableNotificationContent()
-        content.title = "Daily Nugget"
+        content.title = AppConstants.Notifications.Messages.nuggetTitle
         content.body = devotional?.acf?.nugget ?? ""
         content.sound = .default
         content.userInfo = [
             "notificationType": "nugget",
             "devotionalId": devotional?.id ?? 0
         ]
-        
-        // Create 10 am trigger (keeping the same time)
+
+        // Create nugget trigger (keeping the same time)
         var dateComponents = DateComponents()
-        dateComponents.hour = 10
-        dateComponents.minute = 0
+        dateComponents.hour = AppConstants.Notifications.Time.nuggetHour
+        dateComponents.minute = AppConstants.Notifications.Time.nuggetMinute
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         
         // Create request with same identifier to replace existing notification
@@ -204,7 +204,7 @@ class NotificationManager {
     // MARK: - Toggle Notifications
     
     func toggleMorningNotifications(_ enabled: Bool) {
-        UserDefaults.standard.set(enabled, forKey: "morningNotificationsEnabled")
+        UserDefaults.standard.set(enabled, forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled)
         
         if enabled {
             scheduleMorningReminder()
@@ -215,7 +215,7 @@ class NotificationManager {
     }
     
     func toggleNuggetNotifications(_ enabled: Bool) {
-        UserDefaults.standard.set(enabled, forKey: "nuggetNotificationsEnabled")
+        UserDefaults.standard.set(enabled, forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled)
         
         if enabled {
             scheduleDailyNugget()

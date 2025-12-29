@@ -32,7 +32,6 @@ struct UnifiedMenuView: View {
             }
         }
         .background(ColorTheme.background)
-//        .edgesIgnoringSafeArea(.trailing)
     }
     
     private var logoArea: some View {
@@ -40,13 +39,12 @@ struct UnifiedMenuView: View {
             Image("app-logo")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 60, height: 60)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .frame(width: AppConstants.UI.logoSize, height: AppConstants.UI.logoSize)
+                .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.logoCornerRadius))
         }
         .frame(maxWidth: .infinity)
         .padding(.top, sizeClass == .regular ? 40 : 10)
         .padding(.bottom, sizeClass == .regular ? 0 : 20)
-//        .padding(.horizontal)
     }
     
     // MARK: - iPad Layout

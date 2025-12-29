@@ -9,9 +9,9 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
-    @State private var morningEnabled = UserDefaults.standard.bool(forKey: "morningNotificationsEnabled")
-    @State private var nuggetEnabled = UserDefaults.standard.bool(forKey: "nuggetNotificationsEnabled")
+    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.notificationsEnabled)
+    @State private var morningEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled)
+    @State private var nuggetEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled)
     @State private var showAlert = false
     @State private var alertMessage = ""
     
@@ -79,8 +79,8 @@ struct SettingsView: View {
     private func checkNotificationStatus() {
         NotificationManager.shared.checkNotificationSettings { enabled in
             self.notificationsEnabled = enabled
-            self.morningEnabled = UserDefaults.standard.bool(forKey: "morningNotificationsEnabled")
-            self.nuggetEnabled = UserDefaults.standard.bool(forKey: "nuggetNotificationsEnabled")
+            self.morningEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.morningNotificationsEnabled)
+            self.nuggetEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.nuggetNotificationsEnabled)
         }
     }
     

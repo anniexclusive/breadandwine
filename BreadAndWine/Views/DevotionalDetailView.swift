@@ -60,8 +60,7 @@ struct DevotionalDetailView: View {
                     }
                 }
                 .frame(height: webViewHeight)
-//                DevotionalContentView(htmlContent: devotional.content.rendered ?? "")
-                
+
                 if let acf = devotional.acf {
                     VStack(alignment: .leading, spacing: 20) {
                         if let verse = acf.further_study {
@@ -107,9 +106,6 @@ struct DevotionalDetailView: View {
         }
         .onAppear(perform: loadContent)
         .onDisappear(perform: speechSynthesizer.stop)
-//        .onAppear {
-//            formatHTMLContent()
-//        }
     }
     
     private func loadContent() {
@@ -200,9 +196,8 @@ struct DevotionalDetailView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 250)
+                            .frame(height: AppConstants.UI.bannerHeight)
                             .clipped()
-//                            .cornerRadius(12)
                     case .failure:
                         placeholderImage
                     @unknown default:
@@ -214,13 +209,13 @@ struct DevotionalDetailView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 250)
+        .frame(height: AppConstants.UI.bannerHeight)
     }
     
     private var progressView: some View {
         ProgressView()
             .frame(maxWidth: .infinity)
-            .frame(height: 250)
+            .frame(height: AppConstants.UI.bannerHeight)
             .background(Color(.systemGroupedBackground))
     }
         
@@ -230,7 +225,7 @@ struct DevotionalDetailView: View {
             .scaledToFit()
             .frame(height: 80)
             .frame(maxWidth: .infinity)
-            .frame(height: 250)
+            .frame(height: AppConstants.UI.bannerHeight)
             .foregroundColor(.secondary.opacity(0.3))
             .background(Color(.systemGroupedBackground))
     }
@@ -248,16 +243,6 @@ struct DevotionalDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(ColorTheme.background)
-            .cornerRadius(8)
+            .cornerRadius(AppConstants.UI.standardCornerRadius)
         }
-    
-//    private func formatHTMLContent() {
-//        if let htmlContent = devotional.content.rendered, !htmlContent.isEmpty {
-//            HTMLStringView(htmlContent: htmlContent)
-//                .frame(height: UIScreen.main.bounds.height) // Adjust as needed
-//        } else {
-//            Text("Error loading content.")
-//                .frame(maxWidth: .infinity)
-//        }
-//    }
 }

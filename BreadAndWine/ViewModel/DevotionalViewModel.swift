@@ -13,8 +13,8 @@ class DevotionalViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     static let shared = DevotionalViewModel()
-    
-    private let cacheKey = "cachedDevotionals"
+
+    private let cacheKey = AppConstants.UserDefaultsKeys.cachedDevotionals
     
     init() {
             loadCachedDevotionals()
@@ -47,7 +47,7 @@ class DevotionalViewModel: ObservableObject {
         // Get today's date in the same format as the devotional dates
         let today = Date()
         let formatter = DateFormatter()
-        formatter.dateFormat = "d MMMM yyyy"
+        formatter.dateFormat = AppConstants.DateFormat.display
         let todayString = formatter.string(from: today)
         
         // Find the devotional that matches today's date
@@ -66,7 +66,7 @@ class DevotionalViewModel: ObservableObject {
             UserDefaults.standard.set(encoded, forKey: cacheKey)
         }
     }
-//        
+
     private func loadCachedDevotionals() {
         if let data = UserDefaults.standard.data(forKey: cacheKey),
             let devotionals = try? JSONDecoder().decode([Devotional].self, from: data) {

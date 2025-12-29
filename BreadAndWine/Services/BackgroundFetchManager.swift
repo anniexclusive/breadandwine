@@ -14,21 +14,21 @@ class BackgroundFetchManager {
     private init() {}
     
     func registerBackgroundTasks() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.devotionalapp.nuggetFetch",
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: AppConstants.Notifications.backgroundFetchIdentifier,
                                         using: nil) { task in
             self.handleAppRefresh(task: task as! BGAppRefreshTask)
         }
     }
-    
+
     func scheduleBackgroundFetch() {
-        let request = BGAppRefreshTaskRequest(identifier: "com.devotionalapp.nuggetFetch")
+        let request = BGAppRefreshTaskRequest(identifier: AppConstants.Notifications.backgroundFetchIdentifier)
         
-        // Schedule the task to run before 2 PM
-        // Calculate next fetch time (e.g., 1:45 PM today or tomorrow)
+        // Schedule the task to run before nugget notification time
+        // Calculate next fetch time (e.g., 9:45 AM today or tomorrow)
         let now = Date()
         var targetComponents = Calendar.current.dateComponents([.year, .month, .day], from: now)
-        targetComponents.hour = 9
-        targetComponents.minute = 45
+        targetComponents.hour = AppConstants.Notifications.Time.backgroundFetchHour
+        targetComponents.minute = AppConstants.Notifications.Time.backgroundFetchMinute
         
         var targetDate = Calendar.current.date(from: targetComponents)!
         

@@ -28,10 +28,10 @@ struct BreadAndWineApp: App {
                     RootView() // Your existing main view
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: showSplash)
+            .animation(.easeInOut(duration: AppConstants.Timing.splashAnimationDuration), value: showSplash)
             .onAppear {
-                // Hide splash after 2 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                // Hide splash screen after configured duration
+                DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Timing.splashScreenDuration) {
                     showSplash = false
                 }
                 checkForUpdates()
@@ -49,9 +49,8 @@ struct BreadAndWineApp: App {
     
     private func checkForUpdates() {
         let currentTime = Date().timeIntervalSince1970
-        let twentyFourHours: TimeInterval = 86400
-        
-        if currentTime - lastUpdateCheck > twentyFourHours {
+
+        if currentTime - lastUpdateCheck > AppConstants.Timing.updateCheckInterval {
             // Trigger updates
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: NSNotification.Name("RefreshDevotionalContent"), object: nil)
