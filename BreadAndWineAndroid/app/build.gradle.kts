@@ -1,24 +1,34 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
-    namespace = "com.firstloveassembly.breadandwine"
-    compileSdk = 34
+    namespace = "breadandwineandroid.breadandwineandroid"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.firstloveassembly.breadandwine"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        applicationId = "breadandwineandroid.breadandwineandroid"
+        minSdk = 21
+        targetSdk = 36
+        versionCode = 16
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("../keystore/breadandwine.keystore")
+            storePassword = System.getenv("BNW_KEYSTORE_PASSWORD")
+            keyAlias = "breadandwine"
+            keyPassword = System.getenv("BNW_KEYSTORE_PASSWORD")  // Same as keystore password
         }
     }
 
@@ -30,6 +40,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -45,10 +56,6 @@ android {
 
     buildFeatures {
         compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
     }
 
     packaging {
@@ -117,13 +124,9 @@ dependencies {
     // HTML rendering
     implementation("androidx.compose.ui:ui-text:1.5.4")
 
-    // Accompanist (for WebView and System UI)
-    implementation("com.google.accompanist:accompanist-webview:0.32.0")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
-
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.21")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("androidx.arch.core:core-testing:2.2.0")

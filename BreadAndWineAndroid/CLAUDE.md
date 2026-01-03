@@ -8,8 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Native Android companion to the iOS app, delivering daily spiritual devotionals. Built with Kotlin + Jetpack Compose, using WordPress REST API backend and Firebase for push notifications.
 
-**Package:** `com.firstloveassembly.breadandwine`
-**Min SDK:** 24 (Android 7.0) | **Target SDK:** 34 (Android 14)
+**Package:** `breadandwineandroid.breadandwineandroid`
+**Min SDK:** 21 (Android 5.0) | **Target SDK:** 36 (Android 14)
+**Current Version:** 2.0.1 (versionCode: 15)
 
 ## Build & Test Commands
 
@@ -50,6 +51,28 @@ open app/build/reports/tests/testDebugUnitTest/index.html
 - **Model:** `model/Devotional.kt` - Data classes matching WordPress API JSON
 - **ViewModel:** `viewmodel/` - State management with Kotlin Flow
 - **View:** `ui/` - Jetpack Compose screens (no XML layouts)
+
+### Package Structure
+```
+app/src/main/java/breadandwineandroid/breadandwineandroid/
+├── BreadAndWineApp.kt          # Application class
+├── MainActivity.kt              # Main entry point
+├── data/
+│   ├── api/                     # Retrofit API interfaces
+│   ├── cache/                   # DataStore caching
+│   └── repository/              # Repository pattern
+├── model/                       # Data models
+├── service/                     # Background services
+├── ui/                          # Compose screens
+├── util/                        # Utilities
+└── viewmodel/                   # ViewModels
+```
+
+**Important:** The namespace and applicationId are both `breadandwineandroid.breadandwineandroid`. This must match in:
+- `build.gradle.kts` (namespace & applicationId)
+- `google-services.json` (package_name)
+- All Kotlin package declarations
+- AndroidManifest.xml component names
 
 ### Data Flow
 ```
@@ -202,6 +225,17 @@ adb shell su root date 110610002025.00  # Nov 6 10:00 2025
 - ViewModels: `DevotionalViewModel`, `SettingsViewModel`
 - Services: `TextToSpeechManager`, `NotificationScheduler`
 
+**Git Commit Conventions:**
+- Use standard conventional commit format: `type: description`
+- Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`, `perf`
+- Keep message to one line, concise and descriptive
+- Never mention AI assistance or Claude in commit messages
+- Examples:
+  - `feat: add loading indicator to devotional list`
+  - `fix: resolve proguard stripping api classes`
+  - `chore: update version to 2.0.1`
+  - `refactor: migrate to breadandwineandroid package`
+
 ## Known Gotchas
 
 1. **BlockQuote Styling:** Uses `QuoteSpan` not CSS. Add `<br>` tags via string replacement for padding.
@@ -214,7 +248,13 @@ adb shell su root date 110610002025.00  # Nov 6 10:00 2025
    - `compileOptions { isCoreLibraryDesugaringEnabled = true }`
    - `dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4") }`
 
-5. **Firebase Not Working:** Check `google-services.json` exists and package name matches exactly: `com.firstloveassembly.breadandwine`
+5. **Firebase Not Working:** Check `google-services.json` exists and package name matches exactly: `breadandwineandroid.breadandwineandroid`
+
+6. **ProGuard/R8 Stripping API Classes:** If release build shows blank screens (no API data), ProGuard may be removing critical classes. The `proguard-rules.pro` file includes rules to keep:
+   - Retrofit API interfaces and Gson models
+   - ViewModels and Repository classes
+   - Data models and serialization annotations
+   - Never disable these rules in release builds
 
 ## Firebase Setup
 
@@ -229,35 +269,67 @@ adb shell su root date 110610002025.00  # Nov 6 10:00 2025
 devices/{fcm_token}
   - token: string
   - platform: "android"
-  - appVersion: "1.0.0"
+  - appVersion: "2.0.1"
   - lastActive: Timestamp
 ```
+
+## ProGuard/R8 Configuration
+
+**Critical for Release Builds:** The app uses ProGuard/R8 for code shrinking and obfuscation. The following classes MUST be kept or the app will show blank screens in release builds:
+
+**Key Rules in `proguard-rules.pro`:**
+```proguard
+# Data models - required for Gson serialization
+-keep class breadandwineandroid.breadandwineandroid.model.** { *; }
+
+# API interfaces - required for Retrofit
+-keep interface breadandwineandroid.breadandwineandroid.data.api.** { *; }
+-keep class breadandwineandroid.breadandwineandroid.data.api.** { *; }
+
+# ViewModels and Repository - required for data flow
+-keep class breadandwineandroid.breadandwineandroid.viewmodel.** { *; }
+-keep class breadandwineandroid.breadandwineandroid.data.repository.** { *; }
+-keep class breadandwineandroid.breadandwineandroid.data.cache.** { *; }
+```
+
+**Debugging ProGuard Issues:**
+1. If release build works but shows no data → ProGuard stripped API classes
+2. Build with `minifyEnabled = false` temporarily to confirm
+3. Check `app/build/outputs/mapping/release/usage.txt` to see removed classes
+4. Add `-keep` rules for any missing classes
+5. Never ship to Play Store without testing release build on physical device
 
 ## Deployment Checklist
 
 **Before releasing:**
 - [ ] Update version in `app/build.gradle.kts` (versionCode + versionName)
+- [ ] Build release APK: `./gradlew assembleRelease`
+- [ ] Install release APK on physical device (NOT debug build)
+- [ ] **CRITICAL:** Verify API data loads correctly in release build
 - [ ] Test on physical device (emulator notifications unreliable)
 - [ ] Verify all notifications work (local + push)
 - [ ] Test offline mode with cached content
 - [ ] Check text-to-speech with actual devotional content
 - [ ] Build release bundle: `./gradlew bundleRelease`
-- [ ] Sign with production keystore (not debug key)
+- [ ] Sign with production keystore (BNW_KEYSTORE_PASSWORD env var)
+- [ ] Upload `.aab` file to Play Store (NOT `.apk`)
 
 ## When Things Break
 
 **Check in order:**
-1. Logcat for stack traces (`adb logcat | grep BreadAndWine`)
+1. Logcat for stack traces (`adb logcat | grep breadandwine`)
 2. Build → Clean Project → Rebuild
 3. Invalidate Caches / Restart (Android Studio)
 4. Delete `app/build/` and re-sync Gradle
 5. Compare with iOS implementation for expected behavior
 
 **Common fixes:**
+- **Release build shows blank screen/no data** → ProGuard stripped API classes, check proguard-rules.pro
 - DataStore errors → wrap in try-catch with defaults
 - Notification not showing → check channel creation in Application class
 - TTS not speaking → verify permissions and TTS engine installed
 - Date format wrong → ensure desugaring enabled and app rebuilt
+- Package name mismatch → ensure namespace and applicationId both use `breadandwineandroid.breadandwineandroid`
 
 ## Important Files Reference
 
@@ -273,3 +345,14 @@ devices/{fcm_token}
 - iOS `SpeechSynthesizer.swift` ↔ Android `TextToSpeechManager.kt`
 - iOS `NotificationManager.swift` ↔ Android `NotificationScheduler.kt`
 - iOS `AppDelegate.swift` ↔ Android `BreadAndWineApp.kt`
+
+## Recent Changes
+
+**v2.0.1 (December 2024) - Namespace Refactoring:**
+- Changed package from `com.firstloveassembly.breadandwine` → `breadandwineandroid.breadandwineandroid`
+- Moved all source files to new package structure
+- Updated all package declarations, imports, and ProGuard rules
+- Enhanced ProGuard rules to prevent API data loading issues in release builds
+- **Important:** The applicationId and namespace are now identical for consistency
+
+**Why this matters:** Previous builds had mismatched namespace/applicationId causing confusion. Both are now `breadandwineandroid.breadandwineandroid` throughout the codebase, Firebase config, and build files.
