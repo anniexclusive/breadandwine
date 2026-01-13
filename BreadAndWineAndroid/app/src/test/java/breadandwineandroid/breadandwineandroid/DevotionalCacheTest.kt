@@ -31,7 +31,7 @@ class DevotionalCacheTest {
     @Test
     fun `saveNotificationSettings stores correct values`() = runTest {
         // Given
-        cache = DevotionalCache(context)
+        cache = DevotionalCache.getInstance(context)
 
         // When - save settings (will fail gracefully in test)
         try {
@@ -51,7 +51,7 @@ class DevotionalCacheTest {
     @Test
     fun `getNotificationSettings returns default values`() = runTest {
         // Given
-        cache = DevotionalCache(context)
+        cache = DevotionalCache.getInstance(context)
 
         // When - get settings with defaults
         val result = try {

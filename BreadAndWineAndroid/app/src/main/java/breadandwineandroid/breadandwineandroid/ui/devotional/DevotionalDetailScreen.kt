@@ -396,16 +396,122 @@ private fun applyCustomStyling(spanned: Spanned, italicColor: Int, quoteColor: I
 }
 
 /**
+ * Decode HTML entities to plain text
+ */
+private fun decodeHtmlEntities(text: String): String {
+    return text
+        .replace("&nbsp;", " ")
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&#039;", "'")
+        .replace("&apos;", "'")
+        .replace("&#8230;", "…")  // Ellipsis
+        .replace("&#8220;", """)  // Left double quote
+        .replace("&#8221;", """)  // Right double quote
+        .replace("&#8216;", "'")  // Left single quote
+        .replace("&#8217;", "'")  // Right single quote
+        .replace("&#8211;", "–")  // En dash
+        .replace("&#8212;", "—")  // Em dash
+        .replace("&#8226;", "•")  // Bullet
+        .replace("&#169;", "©")   // Copyright
+        .replace("&#174;", "®")   // Registered
+        .trim()
+}
+
+/**
  * Share devotional via Android share sheet
+ * Includes complete devotional content without external link
  */
 private fun shareDevotional(context: android.content.Context, devotional: Devotional) {
-    val shareText = """
-        ${devotional.getPlainTitle()}
+    val shareText = buildString {
+        // Header
+        appendLine("::Firstlove Assembly::")
+        appendLine("www.firstloveassembly.org.ng")
+        appendLine()
 
-        ${devotional.getPreviewText()}
+        // Title and Date
+        appendLine(devotional.getPlainTitle())
+        appendLine(devotional.getFormattedDate())
+        appendLine()
 
-        Read more at: https://breadandwinedevotional.com
-    """.trimIndent()
+        // Bible Verse
+        devotional.acf?.bibleVerse?.let { verse ->
+            appendLine("📖 Bible Verse")
+            appendLine(decodeHtmlEntities(verse.replace(Regex("<.*?>"), "")))
+            appendLine()
+        }
+
+        // Main Content - Strip HTML, decode entities, THEN remove embedded nugget
+        var mainContent = devotional.content.rendered
+            .replace(Regex("<.*?>"), "")  // Strip HTML tags first
+            .let { decodeHtmlEntities(it) }  // Decode entities BEFORE comparison
+            .trim()
+
+        // Remove embedded nugget from main content if it exists (plain text comparison)
+        devotional.acf?.nugget?.let { nugget ->
+            val plainNugget = nugget
+                .replace(Regex("<.*?>"), "")
+                .let { decodeHtmlEntities(it) }  // Decode nugget entities too
+                .trim()
+
+            // Normalize ellipsis: convert both … and ... to ... for comparison
+            val normalizedNugget = plainNugget.replace("…", "...")
+            var normalizedContent = mainContent.replace("…", "...")
+
+            if (normalizedNugget.isNotEmpty() && normalizedContent.contains(normalizedNugget)) {
+                // Count occurrences
+                val occurrences = normalizedContent.split(normalizedNugget).size - 1
+
+                // Only remove if there are multiple occurrences - remove the LAST one only
+                if (occurrences > 1) {
+                    val lastIndex = normalizedContent.lastIndexOf(normalizedNugget)
+                    if (lastIndex >= 0) {
+                        // Remove only the last occurrence
+                        normalizedContent = normalizedContent.substring(0, lastIndex) +
+                                           normalizedContent.substring(lastIndex + normalizedNugget.length)
+
+                        // Convert back to proper ellipsis character and update mainContent
+                        mainContent = normalizedContent.replace("...", "…").trim()
+                    }
+                }
+                // If only 1 occurrence, keep it (don't remove)
+            }
+        }
+
+        if (mainContent.isNotEmpty()) {
+            appendLine(mainContent)
+            appendLine()
+        }
+
+        // Further Study
+        devotional.acf?.furtherStudy?.let { study ->
+            appendLine("📚 Further Study")
+            appendLine(decodeHtmlEntities(study.replace(Regex("<.*?>"), "")))
+            appendLine()
+        }
+
+        // Prayer
+        devotional.acf?.prayer?.let { prayer ->
+            appendLine("🙏 Prayer")
+            appendLine(decodeHtmlEntities(prayer.replace(Regex("<.*?>"), "")))
+            appendLine()
+        }
+
+        // Bible Reading Plan
+        devotional.acf?.bibleReadingPlan?.let { plan ->
+            appendLine("📅 Bible Reading Plan")
+            appendLine(decodeHtmlEntities(plan.replace(Regex("<.*?>"), "")))
+            appendLine()
+        }
+
+        // Nugget (keep this separate section at the bottom)
+        devotional.acf?.nugget?.let { nugget ->
+            appendLine("💡 Today's Nugget")
+            appendLine(decodeHtmlEntities(nugget.replace(Regex("<.*?>"), "")))
+        }
+    }.trim()
 
     val sendIntent = Intent().apply {
         action = Intent.ACTION_SEND

@@ -5,6 +5,7 @@ import breadandwineandroid.breadandwineandroid.data.api.WordPressApi
 import breadandwineandroid.breadandwineandroid.data.cache.DevotionalCache
 import breadandwineandroid.breadandwineandroid.model.Devotional
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -90,27 +91,44 @@ class DevotionalRepository(
 
     /**
      * Get today's nugget (from today's devotional)
+     * CACHE-FIRST strategy for fast notification delivery
      */
     suspend fun getTodaysNugget(): String? {
+        // Helper function to find today's devotional
+        fun findTodaysNugget(devotionals: List<Devotional>): String? {
+            val today = java.time.LocalDate.now()
+
+            return devotionals.firstOrNull { devotional ->
+                try {
+                    // WordPress dates are in LocalDateTime format (2026-01-05T00:05:38), not Instant
+                    val devotionalDate = java.time.LocalDateTime.parse(devotional.date).toLocalDate()
+                    devotionalDate.isEqual(today)
+                } catch (e: Exception) {
+                    false
+                }
+            }?.acf?.nugget
+        }
+
         return try {
+            // Check cache FIRST for instant results (no network delay)
+            // Use .first() to get current value immediately, not .collect() which blocks forever
+            val cachedDevotionals = cache.getCachedDevotionals().first()
+            val cachedNugget = findTodaysNugget(cachedDevotionals)
+
+            // Return cached nugget if found
+            if (cachedNugget != null) {
+                return cachedNugget
+            }
+
+            // Cache empty/stale - try API as fallback (fresh install only)
             val response = api.getDevotionalsWithLimit()
             if (response.isSuccessful && response.body() != null) {
-                val today = java.time.LocalDate.now()
-                val todayDevotional = response.body()!!.firstOrNull { devotional ->
-                    try {
-                        val devotionalDate = java.time.Instant.parse(devotional.date)
-                            .atZone(java.time.ZoneId.systemDefault())
-                            .toLocalDate()
-                        devotionalDate.isEqual(today)
-                    } catch (e: Exception) {
-                        false
-                    }
-                }
-                todayDevotional?.acf?.nugget
+                findTodaysNugget(response.body()!!)
             } else {
                 null
             }
         } catch (e: Exception) {
+            // Any exception - return null (notification will use fallback message)
             null
         }
     }

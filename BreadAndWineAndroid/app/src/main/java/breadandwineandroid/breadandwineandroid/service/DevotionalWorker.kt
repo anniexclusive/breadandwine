@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Background Worker for fetching devotionals
  * Mirrors iOS BackgroundFetchManager
- * Runs at 9:45 AM daily to refresh content
+ * Runs at 9:45 AM daily to refresh content before nugget notification (10:00 AM)
  */
 class DevotionalWorker(
     context: Context,
@@ -25,7 +25,8 @@ class DevotionalWorker(
         private const val WORK_NAME = "devotional_fetch_work"
 
         /**
-         * Schedule daily background fetch at 9:45 AM
+         * Schedule daily background fetch at 9:45 AM (matches iOS)
+         * Runs 15 minutes before nugget notification to ensure fresh content
          */
         fun schedule(context: Context) {
             val constraints = Constraints.Builder()
@@ -61,7 +62,7 @@ class DevotionalWorker(
                 workRequest
             )
 
-            Log.d(TAG, "Background fetch scheduled for 9:45 AM daily")
+            Log.d(TAG, "Background fetch scheduled for 9:45 AM daily (matches iOS)")
         }
 
         /**
@@ -80,7 +81,7 @@ class DevotionalWorker(
         Log.d(TAG, "Starting background devotional fetch")
 
         try {
-            val cache = DevotionalCache(applicationContext)
+            val cache = DevotionalCache.getInstance(applicationContext)
             val repository = DevotionalRepository(
                 api = ApiService.api,
                 cache = cache
@@ -93,12 +94,12 @@ class DevotionalWorker(
                 val devotionals = result.getOrNull()
                 Log.d(TAG, "Successfully fetched ${devotionals?.size} devotionals")
 
-                // Update nugget notification with fresh content (mirrors iOS refreshNuggetNotificationContent)
+                // Verify nugget is cached for WorkManager notification (4 AM)
                 val todayNugget = repository.getTodaysNugget()
-                todayNugget?.let { nugget ->
-                    Log.d(TAG, "Today's nugget: $nugget")
-                    // Reschedule nugget notification with updated content
-                    NotificationScheduler.scheduleNuggetNotification(applicationContext, nugget)
+                if (todayNugget != null) {
+                    Log.d(TAG, "Today's nugget cached: ${todayNugget.take(50)}...")
+                } else {
+                    Log.w(TAG, "No nugget found for today - notification will use fallback message")
                 }
 
                 Result.success()

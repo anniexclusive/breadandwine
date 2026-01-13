@@ -14,8 +14,8 @@ android {
         applicationId = "breadandwineandroid.breadandwineandroid"
         minSdk = 21
         targetSdk = 36
-        versionCode = 16
-        versionName = "2.0.1"
+        versionCode = 19
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -77,6 +77,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")  // Override outdated transitive dependency
 
     // Jetpack Compose - Updated to fix CircularProgressIndicator crash
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))

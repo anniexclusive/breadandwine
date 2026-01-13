@@ -15,13 +15,27 @@ import kotlinx.coroutines.flow.map
 /**
  * Cache layer for devotional data using DataStore
  * Mirrors iOS UserDefaults caching strategy
+ * CRITICAL: DataStore MUST be a singleton - multiple instances cause crashes!
+ * This class is now a singleton to ensure only one DataStore instance exists
  */
-class DevotionalCache(private val context: Context) {
 
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "devotional_prefs")
+// Singleton DataStore instance - MUST be at top level
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "devotional_prefs")
+
+class DevotionalCache private constructor(private val context: Context) {
+
     private val gson = Gson()
 
     companion object {
+        @Volatile
+        private var INSTANCE: DevotionalCache? = null
+
+        fun getInstance(context: Context): DevotionalCache {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: DevotionalCache(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+
         private val CACHED_DEVOTIONALS_KEY = stringPreferencesKey("cachedDevotionals")
         private val NOTIFICATIONS_ENABLED_KEY = stringPreferencesKey("notificationsEnabled")
         private val MORNING_NOTIFICATIONS_KEY = stringPreferencesKey("morningNotificationsEnabled")

@@ -7,6 +7,7 @@ import breadandwineandroid.breadandwineandroid.data.api.ApiService
 import breadandwineandroid.breadandwineandroid.data.cache.DevotionalCache
 import breadandwineandroid.breadandwineandroid.data.repository.DevotionalRepository
 import breadandwineandroid.breadandwineandroid.service.NotificationScheduler
+import breadandwineandroid.breadandwineandroid.service.NotificationWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val cache = DevotionalCache(application)
+    private val cache = DevotionalCache.getInstance(application)
     private val repository = DevotionalRepository(
         api = ApiService.api,
         cache = cache
@@ -59,7 +60,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     /**
      * Toggle master notifications
-     * Mirrors iOS toggleAllNotifications
+     * Morning uses AlarmManager (6 AM), Nugget uses WorkManager (4 AM)
      */
     fun toggleNotifications(enabled: Boolean) {
         _notificationsEnabled.value = enabled
@@ -69,18 +70,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 // Schedule both if they were enabled individually
                 if (_morningNotificationsEnabled.value) {
                     NotificationScheduler.scheduleMorningNotification(context)
+                    NotificationWorker.scheduleMorningNotification(context)
                 }
                 if (_nuggetNotificationsEnabled.value) {
-                    // Fetch today's nugget before scheduling
-                    viewModelScope.launch {
-                        val nugget = repository.getTodaysNugget()
-                        NotificationScheduler.scheduleNuggetNotification(context, nugget)
-                    }
+                    NotificationWorker.scheduleNuggetNotification(context)
                 }
             } else {
-                // Cancel all notifications
+                // Cancel all notifications (both AlarmManager and WorkManager)
                 NotificationScheduler.cancelMorningNotification(context)
                 NotificationScheduler.cancelNuggetNotification(context)
+                NotificationWorker.cancelMorningNotification(context)
+                NotificationWorker.cancelNuggetNotification(context)
             }
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to toggle notifications", e)
@@ -90,8 +90,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
-     * Toggle morning notifications
-     * Mirrors iOS toggleMorningNotifications
+     * Toggle morning notifications (6 AM via AlarmManager + WorkManager)
      */
     fun toggleMorningNotifications(enabled: Boolean) {
         _morningNotificationsEnabled.value = enabled
@@ -99,8 +98,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         try {
             if (enabled && _notificationsEnabled.value) {
                 NotificationScheduler.scheduleMorningNotification(context)
+                NotificationWorker.scheduleMorningNotification(context)
             } else {
                 NotificationScheduler.cancelMorningNotification(context)
+                NotificationWorker.cancelMorningNotification(context)
             }
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to toggle morning notifications", e)
@@ -110,21 +111,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
-     * Toggle nugget notifications
-     * Mirrors iOS toggleNuggetNotifications
+     * Toggle nugget notifications (4 AM via WorkManager only)
      */
     fun toggleNuggetNotifications(enabled: Boolean) {
         _nuggetNotificationsEnabled.value = enabled
 
         try {
             if (enabled && _notificationsEnabled.value) {
-                // Fetch today's nugget before scheduling
-                viewModelScope.launch {
-                    val nugget = repository.getTodaysNugget()
-                    NotificationScheduler.scheduleNuggetNotification(context, nugget)
-                }
+                NotificationWorker.scheduleNuggetNotification(context)
             } else {
                 NotificationScheduler.cancelNuggetNotification(context)
+                NotificationWorker.cancelNuggetNotification(context)
             }
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to toggle nugget notifications", e)

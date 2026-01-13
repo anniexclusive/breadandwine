@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
  */
 class DevotionalViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val cache = DevotionalCache(application)
+    private val cache = DevotionalCache.getInstance(application)
     private val repository = DevotionalRepository(
         api = ApiService.api,
         cache = cache
